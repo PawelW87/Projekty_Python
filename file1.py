@@ -20,3 +20,10 @@ for l in list:
     l.__str__()
 
 
+class Transactions:
+    def __init__(self, id: str, operation: str, date, amount: float, comment: str, )
+        self.id = id
+        self.operation = operation
+        self.date = date
+        self.amount = amount
+        self.comment = comment
