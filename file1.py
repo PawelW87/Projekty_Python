@@ -21,7 +21,7 @@ for l in list:
 
 
 class Transactions:
-    def __init__(self, id: str, operation: str, date, amount: float, comment: str, )
+    def __init__(self, id: str, operation: str, date, amount: float, comment: str, ):
         self.id = id
         self.operation = operation
         self.date = date
