@@ -27,3 +27,6 @@ class Transactions:
         self.date = date
         self.amount = amount
         self.comment = comment
+
+"3 grudnia, 1 commit"
+"przypominaiłem sobie o dodaniu tej linii"
