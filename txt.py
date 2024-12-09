@@ -1,24 +1,17 @@
 import os
 import sys
 
-# txt_files path
-FOLDER = 'txt_files' 
-
-# List of .txt files in FOLDER
-txt_files = os.listdir(FOLDER)
-
-filename = input("Enter the name of the file to open: ")
-if filename == "":
-    if txt_files:
-        filename = txt_files[0]
-    else:
-        print("No .txt files in FOLDER.")
-        sys.exit(1)
-
-
-# A path for the selected file in Folder
-path = os.path.join(FOLDER, filename) 
-
+def create_path(folder, txt_files):
+    """Takes filename from user or takes 1st file in folder"""
+    filename = input("Enter the name of the file to open: ")
+    if filename == "":
+        if txt_files:
+            filename = txt_files[0]
+        else:
+            print("No .txt files in FOLDER.")
+            sys.exit(1)
+    path = os.path.join(folder, filename)
+    return path
 
 def open_file(path):
     """Opens and reads the file."""
@@ -35,8 +28,11 @@ def open_file(path):
     
 
 def main():
+    FOLDER = 'txt_files' 
+    txt_files = os.listdir(FOLDER)
+    path = create_path(FOLDER, txt_files)
     content = open_file(path)
-    print(content)
+    print(content) 
     
     
 if __name__ == "__main__":
