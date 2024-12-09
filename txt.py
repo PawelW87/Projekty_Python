@@ -26,6 +26,15 @@ def open_file(path):
         print(f"An error occurred: {e}")
         sys.exit(1)
     
+def save_file(nazwa_pliku, tekst):
+    
+    with open(nazwa_pliku, 'w') as file:
+        file.write(tekst)
+
+# Wywołanie funkcji
+zapisz_do_pliku('przykladowy_plik.txt', "To jest przykładowy tekst.")
+
+
 def main():
     FOLDER = 'txt_files' 
     txt_files = os.listdir(FOLDER)
