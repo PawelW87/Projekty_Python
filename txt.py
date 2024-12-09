@@ -26,14 +26,12 @@ def open_file(path):
         print(f"An error occurred: {e}")
         sys.exit(1)
     
-
 def main():
     FOLDER = 'txt_files' 
     txt_files = os.listdir(FOLDER)
     path = create_path(FOLDER, txt_files)
     content = open_file(path)
     print(content) 
-    
     
 if __name__ == "__main__":
     main()
