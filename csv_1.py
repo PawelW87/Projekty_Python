@@ -1,7 +1,5 @@
 import csv, os
 
-
-
 def csv_open(path):
     with open(path, newline='',encoding='utf-8') as f:
         reader = csv.reader(f, delimiter=';')
