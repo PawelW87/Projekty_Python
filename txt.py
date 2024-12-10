@@ -45,7 +45,7 @@ def save_file(path: str, text: str, mode: str):
 
     Parameters:
 
-    filename: Name of the file to which the text is to be written.
+    path: Name of the file to which the text is to be written.
     text: Text to write to file.
     mode: File opening mode. Available options:
         - 'a': Append data to file.
