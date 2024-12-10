@@ -37,7 +37,7 @@ def create_path_write(folder):
 
 def main():
     FOLDER = 'csv_files' 
-    FILE = 'csv_files\div.csv'
+    FILE = r'csv_files\div.csv'
     list = csv_open(FILE)
     path = create_path_write(FOLDER)
     csv_write(path, 'x', list)
