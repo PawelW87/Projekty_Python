@@ -65,7 +65,7 @@ def add_exchange_rate(row):
 def main():
     csv_file = r'csv_files\div2_.csv'
     df = import_transactions(csv_file)
-    df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
+    df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])].copy()
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
     print(df_filtered)
 
