@@ -11,7 +11,6 @@ def import_transactions(csv_file):
 
     return df
 
-
 def get_nbp_exchange_rate(currency, date):
 
     """
@@ -63,29 +62,15 @@ def add_exchange_rate(row):
     
     return pd.Series([rate, rate_date])
 
-
-# Wyświetlamy wynik
-# print(df[['When', 'Asset', 'kurs NBP', 'data kursu']].head())
-
-
-
 def main():
     csv_file = r'csv_files\div2_.csv'
     df = import_transactions(csv_file)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
     print(df_filtered)
-    
-    
-    
-    
-    # get_nbp_exchange_rate('usd', datetime.strptime('2024-12-09', '%Y-%m-%d'))
-
-
 
 if __name__ == "__main__":
     main()
-
 
 
 # def oblicz_podatek_od_dywidend(df):
