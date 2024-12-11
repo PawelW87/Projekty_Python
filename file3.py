@@ -1,23 +1,35 @@
 import pandas as pd
+import requests
+from datetime import datetime, timedelta
 
 def wczytaj_transakcje(plik_csv):
-    """Wczytuje plik CSV, wybierając kolumny związane z dywidendami"""
-    # Wczytanie pliku CSV i usunięcie spacji z nazw kolumn
-    df = pd.read_csv(plik_csv, sep='', encoding='cp1250', usecols=[2,4,5,6,7,9])
-    df.columns = df.columns.str.strip()  # Usunięcie spacji z początku i końca nazw kolumn
- 
-    # Zmiana nazw kolumn na bardziej czytelne
-    df.rename(columns={
-        'ID symbolu': 'Akcja', 
-        'Rodzaj operacji': 'Typ', 
-        'Gdy': 'Data', 
-        'Suma': 'Kwota dywidendy', 
-        'Aktywa': 'Waluta', 
-        'Komentarz': 'Notatka'
-    }, inplace=True)
-
+    """Wczytuje plik CSV"""
+    columns_to_load = ['Symbol ID', 'Operation type', 'When', 'Sum', 'Asset', 'Comment']
+    df = pd.read_csv(plik_csv, sep=';', header=0, encoding='cp1250', usecols=columns_to_load)
+    df['When'] = pd.to_datetime(df['When'], format='%d.%m.%Y %H:%M')
 
     return df
+
+
+def get_nbp_exchange_rate(currency, date):
+    
+    new_date = date - timedelta(days=1)
+
+
+while not has_date:
+    new_date -= timedelta(days=1)
+    format_date = new_date.strftime('%Y-%m-%d')
+    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{format_date}/?format=json"
+    
+    try:                                   
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        has_date = True                                  
+    except:                                 # A jak nie wyjdzie to sprawdzimy czy w ogóle waluta istnieje w tabeli
+        has_date = False            # cofamy datę o 1 dzień
+        print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
+        new_date -= timedelta(days=1)
 
 def oblicz_podatek_od_dywidend(df):
     """Filtruje dywidendy i oblicza całkowity podatek"""
@@ -30,15 +42,15 @@ def oblicz_podatek_od_dywidend(df):
     return calkowita_kwota_dywidend, podatek
 
 def main():
-    plik_csv = r'csv_files\div2.csv'
+    plik_csv = r'csv_files\div2_.csv'
     df = wczytaj_transakcje(plik_csv)
-    print("Wczytano transakcje:")
-    print(df.to_string())
-    # df_dividend = df[df['Typ'] == 'DIVIDEND']
-    # print(df_dividend)
+    # print(df)
+    df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
+    print(df_filtered)
+
     
   
-  
+#   
 
 if __name__ == "__main__":
     main()
