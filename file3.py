@@ -15,21 +15,25 @@ def get_nbp_exchange_rate(currency, date):
     
     new_date = date - timedelta(days=1)
 
+    has_date = False
 
-while not has_date:
-    new_date -= timedelta(days=1)
-    format_date = new_date.strftime('%Y-%m-%d')
-    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{format_date}/?format=json"
-    
-    try:                                   
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        has_date = True                                  
-    except:                                 # A jak nie wyjdzie to sprawdzimy czy w ogóle waluta istnieje w tabeli
-        has_date = False            # cofamy datę o 1 dzień
-        print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
-        new_date -= timedelta(days=1)
+    while not has_date:        
+        format_date = new_date.strftime('%Y-%m-%d')
+        url = f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{format_date}/?format=json"
+        try:                                   
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            has_date = True                                  
+        except:                                 # A jak nie wyjdzie to sprawdzimy czy w ogóle waluta istnieje w tabeli
+            has_date = False            # cofamy datę o 1 dzień
+            print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
+            new_date -= timedelta(days=1)
+
+    nbp_rate = (data["rates"][0]['mid'])
+    nbp_date = (data["rates"][0]['effectiveDate'])
+    print(nbp_rate, nbp_date)
+    return nbp_date, nbp_rate
 
 def oblicz_podatek_od_dywidend(df):
     """Filtruje dywidendy i oblicza całkowity podatek"""
@@ -47,10 +51,13 @@ def main():
     # print(df)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
     print(df_filtered)
-
     
-  
-#   
+    
+    
+    
+    # get_nbp_exchange_rate('usd', datetime.strptime('2024-12-09', '%Y-%m-%d'))
+
+
 
 if __name__ == "__main__":
     main()
