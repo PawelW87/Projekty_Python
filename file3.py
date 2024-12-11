@@ -2,16 +2,31 @@ import pandas as pd
 import requests
 from datetime import datetime, timedelta
 
-def wczytaj_transakcje(plik_csv):
-    """Wczytuje plik CSV"""
+def import_transactions(csv_file):
+    """Read CSV"""
     columns_to_load = ['Symbol ID', 'Operation type', 'When', 'Sum', 'Asset', 'Comment']
-    df = pd.read_csv(plik_csv, sep=';', header=0, encoding='cp1250', usecols=columns_to_load)
+    df = pd.read_csv(csv_file, sep=';', header=0, encoding='cp1250', usecols=columns_to_load)
     df['When'] = pd.to_datetime(df['When'], format='%d.%m.%Y %H:%M')
 
     return df
 
 
 def get_nbp_exchange_rate(currency, date):
+
+    """
+    Gets the exchange rate from the NBP API website for the previous business day.
+
+    Parameters:
+
+    currency: Three letters currency shortcut
+    date: Date in datetime format object.
+    
+    Returns:
+
+    Rate
+    Date of the course
+
+    """
     
     new_date = date - timedelta(days=1)
 
@@ -25,8 +40,8 @@ def get_nbp_exchange_rate(currency, date):
             response.raise_for_status()
             data = response.json()
             has_date = True                                  
-        except:                                 # A jak nie wyjdzie to sprawdzimy czy w ogóle waluta istnieje w tabeli
-            has_date = False            # cofamy datę o 1 dzień
+        except:                                
+            has_date = False            # back one day after
             print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
             new_date -= timedelta(days=1)
 
@@ -34,6 +49,8 @@ def get_nbp_exchange_rate(currency, date):
     nbp_date = (data["rates"][0]['effectiveDate'])
     print(nbp_rate, nbp_date)
     return nbp_date, nbp_rate
+
+
 
 def oblicz_podatek_od_dywidend(df):
     """Filtruje dywidendy i oblicza całkowity podatek"""
@@ -46,8 +63,8 @@ def oblicz_podatek_od_dywidend(df):
     return calkowita_kwota_dywidend, podatek
 
 def main():
-    plik_csv = r'csv_files\div2_.csv'
-    df = wczytaj_transakcje(plik_csv)
+    csv_file = r'csv_files\div2_.csv'
+    df = import_transactions(csv_file)
     # print(df)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
     print(df_filtered)
