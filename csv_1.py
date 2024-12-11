@@ -31,7 +31,7 @@ def create_path_write(folder):
     """
     Takes filename from user.
     """
-    filename = input("Enter the name of the file to write (without extension): ") + '.csv'
+    filename = input("Enter the name of the file to write (with extension): ")
     path = os.path.join(folder, filename)
     return path
 
