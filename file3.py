@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
@@ -27,7 +28,7 @@ def get_nbp_exchange_rate(currency, date):
     Date of the course
 
     """
-    
+   
     new_date = date - timedelta(days=1)
 
     has_date = False
@@ -45,28 +46,34 @@ def get_nbp_exchange_rate(currency, date):
             print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
             new_date -= timedelta(days=1)
 
-    nbp_rate = (data["rates"][0]['mid'])
-    nbp_date = (data["rates"][0]['effectiveDate'])
-    print(nbp_rate, nbp_date)
-    return nbp_date, nbp_rate
+    rate = (data["rates"][0]['mid'])
+    rate_date = (data["rates"][0]['effectiveDate'])
+    return rate, rate_date
 
+def add_exchange_rate(row):
+    currency = row['Asset']
+    date = row['When']
+    sum_ = row['Sum']
 
-
-def oblicz_podatek_od_dywidend(df):
-    """Filtruje dywidendy i oblicza całkowity podatek"""
-    # Wybieramy tylko operacje związane z dywidendami (przykładowo 'DYWIDENDA' w kolumnie 'Typ')
-    df_dywidendy = df[df['Typ'].str.contains('DIVIDEND', case=False)]
-    calkowita_kwota_dywidend = df_dywidendy['Kwota dywidendy'].sum()
+    if currency == 'PLN':
+        rate = sum_
+        rate_date = date.date()
+    else:
+        rate, rate_date = get_nbp_exchange_rate(currency, date)
     
-    # Obliczamy podatek (19% od łącznej kwoty dywidend)
-    podatek = 0.19 * calkowita_kwota_dywidend
-    return calkowita_kwota_dywidend, podatek
+    return pd.Series([rate, rate_date])
+
+
+# Wyświetlamy wynik
+# print(df[['When', 'Asset', 'kurs NBP', 'data kursu']].head())
+
+
 
 def main():
     csv_file = r'csv_files\div2_.csv'
     df = import_transactions(csv_file)
-    # print(df)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])]
+    df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
     print(df_filtered)
     
     
@@ -78,3 +85,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+# def oblicz_podatek_od_dywidend(df):
+#     """Filtruje dywidendy i oblicza całkowity podatek"""
+#     # Wybieramy tylko operacje związane z dywidendami (przykładowo 'DYWIDENDA' w kolumnie 'Typ')
+#     df_dywidendy = df[df['Typ'].str.contains('DIVIDEND', case=False)]
+#     calkowita_kwota_dywidend = df_dywidendy['Kwota dywidendy'].sum()
+    
+#     # Obliczamy podatek (19% od łącznej kwoty dywidend)
+#     podatek = 0.19 * calkowita_kwota_dywidend
+#     return calkowita_kwota_dywidend, podatek
