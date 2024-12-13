@@ -1,3 +1,5 @@
+"""Welcome. Prepare your csv before start working. You need to open your csv in notebook and save it as *.csv with UTF-8 encoding"""
+
 import sys
 import pandas as pd
 import requests
@@ -12,10 +14,6 @@ def import_transactions(csv_file):
     
     # Conversion of 'When' column for datetime
     df['When'] = pd.to_datetime(df['When'])
-
-    # Usunięcie zbędnych znaków (np. spacje, przecinki) i konwersja 'Sum' na float
-    # df['Sum'] = df['Sum'].replace(',', '.', regex=True)  # Zmiana przecinków na kropki (jeśli są)
-    df['Sum'] = pd.to_numeric(df['Sum'], errors='coerce')  # Konwersja na float (nieprawidłowe wartości zamienią się na NaN)
 
     return df
 
@@ -76,6 +74,27 @@ def write_to_csv(df, folder):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
+def calc_the_tax(df):
+    # Dzielimy DataFrame na wiersze z 'DIVIDEND' oraz wiersze z 'TAX' lub 'US TAX'
+    dividend_df = df[df['Operation type'] == 'DIVIDEND'][['Symbol ID', 'NBP Date', '19% TAX']]
+    tax_df = df[df['Operation type'].isin(['TAX', 'US TAX'])][['Symbol ID', 'NBP Date', 'PLN Sum']]
+
+    # Połączamy wiersze 'DIVIDEND' z wierszami 'TAX/US TAX' na podstawie Symbol ID i NBP Date
+    merged_df = pd.merge(dividend_df, tax_df, on=['Symbol ID', 'NBP Date'], how='left')
+
+    # Obliczamy sumę między '19% TAX' (DIVIDEND) a 'PLN Sum' (TAX/US TAX)
+    merged_df['Dopłata'] = merged_df['19% TAX'] + merged_df['PLN Sum']
+
+    # Złączamy wyniki z oryginalną tabelą
+    df = pd.merge(df, merged_df[['Symbol ID', 'NBP Date', 'Dopłata']], on=['Symbol ID', 'NBP Date'], how='left')
+    df.loc[df['Operation type'] != 'DIVIDEND', 'Dopłata'] = None
+
+    return df
+
+def check_tax_corrections(df):
+    # Przypisanie 'KOREKTA' do kolumny 'Dopłata', jeśli w 'Comment' znajduje się 'recalculation'
+    df['Dopłata'] = df['Dopłata'].where(~df['Comment'].str.contains('recalculation', case=False), 'KOREKTA')
+    return df
 
 def main():
     FOLDER = 'csv_files'
@@ -87,20 +106,10 @@ def main():
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
     df_filtered['PLN Sum'] = df_filtered['NBP Rate'] * df_filtered['Sum']
     df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
-    print(df_filtered)
-    # write_to_csv(df_filtered, FOLDER)
+    df_filtered2 = check_tax_corrections(calc_the_tax(df_filtered))
+    print(df_filtered2)
+    # write_to_csv(df_filtered2, FOLDER)
 
 
 if __name__ == "__main__":
     main()
-
-
-# def oblicz_podatek_od_dywidend(df):
-#     """Filtruje dywidendy i oblicza całkowity podatek"""
-#     # Wybieramy tylko operacje związane z dywidendami (przykładowo 'DYWIDENDA' w kolumnie 'Typ')
-#     df_dywidendy = df[df['Typ'].str.contains('DIVIDEND', case=False)]
-#     calkowita_kwota_dywidend = df_dywidendy['Kwota dywidendy'].sum()
-    
-#     # Obliczamy podatek (19% od łącznej kwoty dywidend)
-#     podatek = 0.19 * calkowita_kwota_dywidend
-#     return calkowita_kwota_dywidend, podatek
