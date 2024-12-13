@@ -79,12 +79,14 @@ def write_to_csv(df, folder):
 
 def main():
     FOLDER = 'csv_files'
-    csv_file = r'csv_files\Custom_.csv'
+    csv_file = r'csv_files\div21.csv'
     df = import_transactions(csv_file)
     # print(df.to_string())
     # print(df)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])].copy()
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
+    df_filtered['PLN Sum'] = df_filtered['NBP Rate'] * df_filtered['Sum']
+    df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
     print(df_filtered)
     # write_to_csv(df_filtered, FOLDER)
 
