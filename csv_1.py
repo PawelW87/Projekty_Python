@@ -35,12 +35,18 @@ def create_path_write(folder):
     path = os.path.join(folder, filename)
     return path
 
+def present(list):
+    for l in list:
+        print(l, '\n')
+    
+
 def main():
     FOLDER = 'csv_files' 
     FILE = r'csv_files\div.csv'
     list = csv_open(FILE)
-    path = create_path_write(FOLDER)
-    csv_write(path, 'x', list)
+    present(list)
+    # path = create_path_write(FOLDER)
+    # csv_write(path, 'x', list)
           
 if __name__ == "__main__":
     main()

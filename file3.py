@@ -2,12 +2,20 @@ import sys
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
+from csv_1 import create_path_write
 
 def import_transactions(csv_file):
     """Read CSV"""
     columns_to_load = ['Symbol ID', 'Operation type', 'When', 'Sum', 'Asset', 'Comment']
+
     df = pd.read_csv(csv_file, sep=';', header=0, encoding='cp1250', usecols=columns_to_load)
+    
+    # Conversion of 'When' column for datetime
     df['When'] = pd.to_datetime(df['When'], format='%d.%m.%Y %H:%M')
+
+    # Usunięcie zbędnych znaków (np. spacje, przecinki) i konwersja 'Sum' na float
+    df['Sum'] = df['Sum'].replace(',', '.', regex=True)  # Zmiana przecinków na kropki (jeśli są)
+    df['Sum'] = pd.to_numeric(df['Sum'], errors='coerce')  # Konwersja na float (nieprawidłowe wartości zamienią się na NaN)
 
     return df
 
@@ -41,7 +49,7 @@ def get_nbp_exchange_rate(currency, date):
             data = response.json()
             has_date = True                                  
         except:                                
-            has_date = False            # back one day after
+            has_date = False            # back one day before
             print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
             new_date -= timedelta(days=1)
 
@@ -52,22 +60,33 @@ def get_nbp_exchange_rate(currency, date):
 def add_exchange_rate(row):
     currency = row['Asset']
     date = row['When']
-    sum_ = row['Sum']
-
+    
     if currency == 'PLN':
-        rate = sum_
+        rate = 1
         rate_date = date.date()
     else:
         rate, rate_date = get_nbp_exchange_rate(currency, date)
     
     return pd.Series([rate, rate_date])
 
+def write_to_csv(df, folder):
+    try:
+        df.to_excel(create_path_write(folder), index=False, header=True)
+        print(f"Writing successful")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+
 def main():
+    FOLDER = 'csv_files'
     csv_file = r'csv_files\div2_.csv'
     df = import_transactions(csv_file)
+    # print(df.to_string())
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])].copy()
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
     print(df_filtered)
+    # write_to_csv(df_filtered, FOLDER)
+
 
 if __name__ == "__main__":
     main()
