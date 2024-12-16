@@ -80,7 +80,7 @@ def write_to_csv(df, folder):
 
 def calc_the_tax(df):
     """
-    Presents the different between the tax already paid and the value has to paid. If it is higher than zero the taxing in Poland is neccessary. 
+    Shows the difference between tax already paid and tax due. If greater than zero, additional payment in Poland must be made.
     """
     # Divides the DataFrame into rows with 'DIVIDEND' and rows with 'TAX' or 'US TAX'
     dividend_df = df[df['Operation type'] == 'DIVIDEND'][['Symbol ID', 'NBP Date', '19% TAX']]
