@@ -1,4 +1,3 @@
-import sys
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
@@ -127,7 +126,7 @@ def main():
     df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
     df_filtered2 = check_tax_corrections(calc_the_tax(df_filtered))
     print(df_filtered2)
-    write_to_csv(df_filtered2, FOLDER)
+    # write_to_csv(df_filtered2, FOLDER)
 
 
 if __name__ == "__main__":
