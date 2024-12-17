@@ -1,4 +1,4 @@
-import csv, os
+import csv, os, sys
 
 def csv_open(path):
     with open(path, newline='',encoding='utf-8') as f:
@@ -39,14 +39,18 @@ def present(list):
     for l in list:
         print(l, '\n')
     
-
 def main():
     FOLDER = 'csv_files' 
     FILE = r'csv_files\div.csv'
     list = csv_open(FILE)
     present(list)
-    # path = create_path_write(FOLDER)
-    # csv_write(path, 'x', list)
+    ask_for_direction = input('Would you like to save a data to new file? y/n: ')
+    if ask_for_direction.lower() == 'y':
+        path = create_path_write(FOLDER)
+        csv_write(path, 'x', list)
+    else:
+        print("Stop")
+        sys.exit(1)
           
 if __name__ == "__main__":
     main()

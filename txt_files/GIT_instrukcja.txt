@@ -1,4 +1,4 @@
-git –-version
+git ï¿½-version
 
 git config --global user.name "w3schools-test"
 git config --global user.email test@w3schools.com
@@ -9,83 +9,81 @@ cd myproject		zmiana katalogu
 git init 
 Initialized empty Git repository in /Users/user/myproject/.git/
 
-Ls    	lista plików w katalogu
+Ls    	lista plikï¿½w w katalogu
 
 git status       lub    git status --short
 tutaj sobie pracujemy i robimy zmiany
 
 git add index.html				dodajemy do fazy staging
-git add –-all = git add –A
+git add ï¿½-all = git add ï¿½A
 
-git commit -m "First release of Hello World!" – komentarz do zmian i zatwierdzenie
+git commit -m "First release of Hello World!" ï¿½ komentarz do zmian i zatwierdzenie
 
-git commit -a -m "Updated index.html with a new line" – mo¿na pominaæ staging
+git commit -a -m "Updated index.html with a new line" ï¿½ moï¿½na pominaï¿½ staging
 
 git log
-* git command -help- Zobacz wszystkie dostêpne opcje dla konkretnego polecenia
-* git help --all- Zobacz wszystkie mo¿liwe polecenia
+* gitï¿½commandï¿½-help- Zobacz wszystkie dostï¿½pne opcje dla konkretnego polecenia
+* git help --all- Zobacz wszystkie moï¿½liwe polecenia
 
-git branch hello-world-images – tworzy ga³¹Ÿ hello-world-images
-git branch 		- wyswietla ga³êzie i pokazuje *w której jesteœmy
-git checkout hello-world-images 	- przeskakuje do branch’u
-ls  mo¿e byæ ró¿ne w ró¿nych branch’ach
+git branch hello-world-images ï¿½ tworzy gaï¿½ï¿½ï¿½ hello-world-images
+git branch 		- wyswietla gaï¿½ï¿½zie i pokazuje *w ktï¿½rej jesteï¿½my
+git checkout hello-world-images 	- przeskakuje do branchï¿½u
+ls  moï¿½e byï¿½ rï¿½ne w rï¿½nych branchï¿½ach
 
-git checkout -b emergency-fix		- tworzy nowy branch (ga³¹Ÿ) emergency-fix i od razu do niej przeskakuje
+git checkout -b emergency-fix		- tworzy nowy branch (gaï¿½ï¿½ï¿½) emergency-fix i od razu do niej przeskakuje
 
-git merge emergency-fix	- ³¹czy obecn¹ ga³¹Ÿ z emergency-fix
+git merge emergency-fix	- ï¿½ï¿½czy obecnï¿½ gaï¿½ï¿½ï¿½ z emergency-fix
 
-git branch -d emergency-fix		po zmer¿owaniu mo¿emy usun¹ ga³¹Ÿ emergency-fix
+git branch -d emergency-fix		po zmerï¿½owaniu moï¿½emy usunï¿½ gaï¿½ï¿½ï¿½ emergency-fix
 
 czasem mergowanie nie wychodzi: 
 CONFLICT (content): Merge conflict in index.html
 Automatic merge failed; fix conflicts and then commit the result.
 
-git status – sprawdzamy o co chodzi
+git status ï¿½ sprawdzamy o co chodzi
 
-przechodzimy do VSCode i tam wyœwietlamy ró¿nice w branch’ach. Zatwierdzamy rêcznie zmiany
+przechodzimy do VSCode i tam wyï¿½wietlamy rï¿½nice w branchï¿½ach. Zatwierdzamy rï¿½cznie zmiany
 
 robimy git add plik
-git status – mówi jak wygl¹da stan kofliktu
-wtedy git commit –m „po³¹czono ga³êzie master i t¹ drug¹ po rozwi¹zaniu konfliktu”
+git status ï¿½ mï¿½wi jak wyglï¿½da stan kofliktu
+wtedy git commit ï¿½m ï¿½poï¿½ï¿½czono gaï¿½ï¿½zie master i tï¿½ drugï¿½ po rozwiï¿½zaniu konfliktuï¿½
 
-usuwamy niepotrzebn¹ ga³¹Ÿ:
+usuwamy niepotrzebnï¿½ gaï¿½ï¿½ï¿½:
 git branch -d hello-world-images
 
 GITHUB
-git remote add origin https://github.com/w3schools-test/hello-world.git	 dodaje zdalne repozytorium z github’a NAZWA REPO w wierszu poleceñ. Origin to okreœlenie strony w githubie. 
+git remote add origin https://github.com/w3schools-test/hello-world.git	 dodaje zdalne repozytorium z githubï¿½a NAZWA REPO w wierszu poleceï¿½. Origin to okreï¿½lenie strony w githubie. 
 
-git push --set-upstream origin master(main) – wysyla localne repo do origin
+git push --set-upstream origin master(main) ï¿½ wysyla localne repo do origin
 
       alternatywnie:
 		git branch -M main 
       git push -u origin main
 
-Pracuj¹c nad kodem bezpoœrednio w github mo¿na commitowaæ w origin.
-Jeœli ktoœ inny lub my dokonaliœmy zmian w origin nale¿y przed prac¹ na lokalnym katalogu zaktualizowaæ lokalny branch.
+Pracujï¿½c nad kodem bezpoï¿½rednio w github moï¿½na commitowaï¿½ w origin.
+Jeï¿½li ktoï¿½ inny lub my dokonaliï¿½my zmian w origin naleï¿½y przed pracï¿½ na lokalnym katalogu zaktualizowaï¿½ lokalny branch.
 
-git fetch origin – sprawdza aktualizacje origin
-git status – podaje zmiany w origin
-git log origin/master – pokazuje logi w origin
-git diff origin/master – pokazuje roznice
-git merge origin/master – scala lokalne repo z origin
-git status – 
-pull jest kombinacj¹ fetch i merge
+git fetch origin ï¿½ sprawdza aktualizacje origin
+git status ï¿½ podaje zmiany w origin
+git log origin/master ï¿½ pokazuje logi w origin
+git diff origin/master ï¿½ pokazuje roznice
+git merge origin/master ï¿½ scala lokalne repo z origin
+git status ï¿½ 
+pull jest kombinacjï¿½ï¿½fetch iï¿½merge
 
-git pull origin -	 aktualizowaæ nasz lokalny Git
+git pull origin -	 aktualizowaï¿½ nasz lokalny Git
 git push origin - 	aktualizuje repo w githubie
 
 NOWY BRANCH W GITHUB -> aktualizacja lokalnego repo
 git pull   - 	widzimy nowy branch w github
-git branch –a	pokazuje wszystkie ga³êzie (lokalne i zdalne)
-git checkout nazwa nowego branch’u
-git pull -	œci¹ga brancha z githuba
-git branch – wyœwietla branch’e po aktualizacji
+git branch ï¿½a	pokazuje wszystkie gaï¿½ï¿½zie (lokalne i zdalne)
+git checkout nazwa nowego branchï¿½u
+git pull -	ï¿½ciï¿½ga brancha z githuba
+git branch ï¿½ wyï¿½wietla branchï¿½e po aktualizacji
 
-TWORZENIE LOKALNEGO BRANCH’A I WYSY£KA DO GITHUB
+TWORZENIE LOKALNEGO BRANCHï¿½A I WYSYï¿½KA DO GITHUB
 
 git checkout -b update-readme
  teraz wprowadzamy zmiany w pliku, sprawdzamy status i dodajemy staging (git add README.md)
 potem commitujemy.
-git push origin update-readme -- 	wysy³a nowy branch update-readme do github
-
-
+git push origin update-readme -- 	wysyï¿½a nowy branch update-readme do github

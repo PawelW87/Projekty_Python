@@ -3,7 +3,7 @@ import sys
 
 def create_path(folder, txt_files):
     """
-    Takes filename from user or takes 1st file in folder
+    Takes filename to open from user or takes 1st file in folder
     """
     filename = input("Enter the name of the file to open: ")
     if filename == "":
@@ -20,7 +20,7 @@ def create_path_write(folder):
     """
     Takes filename from user.
     """
-    filename = input("Enter the name of the file to write (without extension): ") + '.txt'
+    filename = input("Enter the name of the .txt file to write (without extension): ") + '.txt'
     path = os.path.join(folder, filename)
     return path
 
@@ -77,14 +77,45 @@ def save_file(path: str, text: str, mode: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
+def ask_for_direction(content, folder):
+    """
+    Asks the user what to do:
+
+    add:    The user enters text and the program add it and write to a new file.
+    y:      The program saves data to a new file.
+    n:      Program ends operation.
+
+    """
+    ask_for_direction = input('Would you like to save a data to new file or add something? y/n/add: ')
+
+    new_file = False #Flag
+
+    if ask_for_direction.lower() == 'add':
+        text = content + '\n' + input("Input text for write: ")
+        new_file = True
+    elif ask_for_direction.lower() == 'y':
+        text = content
+        new_file = True
+    elif ask_for_direction.lower() == 'n':
+        new_file = False
+        print("Stop.")
+        sys.exit(1)
+    else:
+        new_file = False
+        print("Unexpected answer.")
+        sys.exit(1)
+        
+    if new_file is True:
+        path_1 = create_path_write(folder)
+        save_file(path_1, text, mode='a')
+
 def main():
     FOLDER = 'txt_files' 
     txt_files = os.listdir(FOLDER)
     path = create_path(FOLDER, txt_files)
     content = open_file(path)
-    path_1 = create_path_write(FOLDER)
-    text = content + '\n' + input("Input text for write: ") 
-    save_file(path_1, text, mode='a')
-
+    print(content)
+    ask_for_direction(content, FOLDER)
+   
 if __name__ == "__main__":
     main()
