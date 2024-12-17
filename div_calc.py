@@ -110,7 +110,9 @@ def show_FUNDING_WITHDRAWAL(df):
     Present fundings and withdrawals
     """
     df_FUNDING_WITHDRAWAL = df[df['Operation type'].isin(['FUNDING/WITHDRAWAL'])].copy()  
+    total_sum = df_FUNDING_WITHDRAWAL['Sum'].sum()
     print(df_FUNDING_WITHDRAWAL)
+    print(f"Suma wpłat i wypłat to: {total_sum} EUR")
 
 def main():
     FOLDER = 'csv_files'
