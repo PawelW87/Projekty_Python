@@ -77,37 +77,39 @@ def save_file(path: str, text: str, mode: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def ask_for_direction(content, folder):
+def get_user_choice():
+    """Asks the user for a choice if no response is given"""
+    while True:
+        user_choice = input('Would you like to save a data to new file or add something? y/n/add: ').lower()
+
+        if user_choice == 'n':
+            print("Stop.")
+            sys.exit(1)
+
+        if user_choice in ['add', 'y']:
+            return user_choice
+
+        print("Unexpected answer. Please try again.")
+
+def write_file(content, folder):
     """
     Asks the user what to do:
 
     add:    The user enters text and the program add it and write to a new file.
     y:      The program saves data to a new file.
     n:      Program ends operation.
-
+    
     """
-    ask_for_direction = input('Would you like to save a data to new file or add something? y/n/add: ')
+    user_choice = get_user_choice()
 
-    new_file = False #Flag
-
-    if ask_for_direction.lower() == 'add':
+    if user_choice == 'add':
         text = content + '\n' + input("Input text for write: ")
-        new_file = True
-    elif ask_for_direction.lower() == 'y':
-        text = content
-        new_file = True
-    elif ask_for_direction.lower() == 'n':
-        new_file = False
-        print("Stop.")
-        sys.exit(1)
+    
     else:
-        new_file = False
-        print("Unexpected answer.")
-        sys.exit(1)
+        text = content
         
-    if new_file is True:
-        path_1 = create_path_write(folder)
-        save_file(path_1, text, mode='a')
+    path_1 = create_path_write(folder)
+    save_file(path_1, text, mode='a')
 
 def main():
     FOLDER = 'txt_files' 
@@ -115,7 +117,7 @@ def main():
     path = create_path(FOLDER, txt_files)
     content = open_file(path)
     print(content)
-    ask_for_direction(content, FOLDER)
+    write_file(content, FOLDER)
    
 if __name__ == "__main__":
     main()
