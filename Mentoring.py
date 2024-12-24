@@ -1,3 +1,6 @@
+#   https://docs.google.com/document/d/1iJyhmVdYkBUF_lFekd1ZIm_9Y8Oa2FWMjTxlfUYVZcc/edit?tab=t.0#heading=h.yf97mum0tywb
+#   https://docs.google.com/document/d/1iJyhmVdYkBUF_lFekd1ZIm_9Y8Oa2FWMjTxlfUYVZcc/edit?usp=sharing
+
 # a = 5 / 10
 # def dodaj(a: int , b):
 #     """ opis funkcji """ 
