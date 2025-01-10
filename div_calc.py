@@ -115,7 +115,7 @@ def show_FUNDING_WITHDRAWAL(df):
 
 def main():
     FOLDER = 'csv_files'
-    csv_file = r'csv_files\div2.csv'
+    csv_file = r'csv_files\div24.csv'
     df = import_transactions(csv_file)
     # print(df.to_string()) ### Present all rows.
     # print(df)
