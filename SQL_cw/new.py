@@ -2,10 +2,14 @@ import sqlite3
 con = sqlite3.connect("tutorial.db")
 cur = con.cursor()
 # cur.execute("CREATE TABLE movies(title, year, score)")
-res = cur.execute("SELECT title, year, score FROM movies ORDER BY score DESC")
-tab = res.fetchmany(3)
+res = cur.execute("SELECT * FROM movies")
+tab = res.fetchall()
 for t in tab:
     print(t)
+# res = cur.execute("SELECT SUM(score) AS total FROM movies WHERE score > 7.9")
+# tab = res.fetchall()
+# for t in tab:
+#     print(t)
 # res2 = cur.execute("SELECT title, year FROM movies ORDER BY score DESC")
 # title, year = res2.fetchone()
 # print(f"The highest scoring Monty Python movie is {title!r}, released in {year}.")
