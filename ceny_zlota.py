@@ -3,6 +3,8 @@ import plotly.express as px
 import requests
 from datetime import datetime
 
+import click
+
 def fetch_gold_price_in_pln(from_date, to_date):
     """
     Pobiera ceny złota w PLN za gram z API NBP dla podanego zakresu dat.
@@ -11,7 +13,9 @@ def fetch_gold_price_in_pln(from_date, to_date):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        print("Gold data structure:", data)  # Diagnostyka
+        return data
     except requests.exceptions.RequestException as e:
         print(f"Błąd podczas pobierania cen złota: {e}")
         return None
@@ -26,6 +30,7 @@ def fetch_usd_exchange_rate(from_date, to_date):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
+        print("USD rates structure:", data)  # Diagnostyka
         return data['rates']  # API NBP zwraca listę kursów w polu 'rates'
     except requests.exceptions.RequestException as e:
         print(f"Błąd podczas pobierania kursów USD/PLN: {e}")
@@ -41,39 +46,94 @@ def calculate_gold_price_in_usd(gold_prices, usd_rates):
     usd_df = pd.DataFrame(usd_rates)
     
     # Konwersja kolumny 'effectiveDate' w USD na typ datetime
-    gold_df['data'] = pd.to_datetime(gold_df['data'])
+    gold_df['date'] = pd.to_datetime(gold_df['date'])
     usd_df['effectiveDate'] = pd.to_datetime(usd_df['effectiveDate'])
 
     # Łączenie danych na podstawie dat
-    merged_df = pd.merge(gold_df, usd_df, left_on='data', right_on='effectiveDate', how='inner')
+    merged_df = pd.merge(gold_df, usd_df, left_on='date', right_on='effectiveDate', how='inner')
 
     # Obliczanie ceny złota w USD za uncję
     merged_df['gold_price_usd'] = (merged_df['cena'] / merged_df['mid']) * 31.1035
 
     # Zwrócenie wyników
-    return merged_df[['data', 'cena', 'mid', 'gold_price_usd']]
+    return merged_df[['date', 'cena', 'mid', 'gold_price_usd']]
 
+def plot_(DF, y_, title_):
+    """
 
-# Główna część programu
-from_date = "2024-01-01"
-to_date = "2024-12-30"
+    Parameters:
 
-gold_prices = fetch_gold_price_in_pln(from_date, to_date)
-usd_rates = fetch_usd_exchange_rate(from_date, to_date)
+    DF: .
+    y_: 
+    title_: 
+    """
+    fig = px.line(DF, x='effectiveDate', y=y_, title=title_)
+    fig.show()
 
-if gold_prices and usd_rates:
-    result_df = calculate_gold_price_in_usd(gold_prices, usd_rates)
-    # print(result_df)
-    # result_df.to_csv('gold_prices_usd.csv', index=False)  # Zapis wyników do pliku CSV
-    # print("Dane zapisane do pliku 'gold_prices_usd.csv'")
-else:
-    print("Nie udało się pobrać danych.")
+# fig = px.line(result_df, x='date', y='gold_price_usd', title='Wykres cen złota')
+ 
 
+@click.group()
+@click.pass_context
+def cli(ctx):
+    """
+    Program analizujący ceny złota i kurs USD/PLN.
+    """
+    print("Hello! Przygotowuję dane...")
+    ctx.ensure_object(dict)   # Tworzenie obiektu kontekstu
 
+    # Zakres dat
+    from_date = "2024-01-01"
+    to_date = "2024-12-30"
 
-fig = px.line(result_df, x='data', y='gold_price_usd', title='Wykres cen złota')
-fig.show()
+    # Pobieranie danych
+    gold_prices = fetch_gold_price_in_pln(from_date, to_date)
+    usd_rates = fetch_usd_exchange_rate(from_date, to_date)
+    
+    if gold_prices and usd_rates:
+        ctx.obj['DF'] = calculate_gold_price_in_usd(gold_prices, usd_rates)
+    else:
+        print("Nie udało się pobrać danych.")
+    ctx.obj['DF'] = None  
 
+@cli.command()
+@click.pass_context
+def usd(ctx):
+    """
+    Wyświetla wykres kursu USD/PLN w czasie.
+    """
+    DF = ctx.obj['DF']
+    if DF is not None:
+        plot_(DF, 'mid', 'Kurs USD/PLN w czasie')
+    else:
+        print("Brak danych do wyświetlenia.")
 
+@cli.command()
+@click.pass_context
+def gold(ctx):
+    """
+    Wyświetla wykres cen złota w USD w czasie.
+    """
+    DF = ctx.obj['DF']
+    if DF is not None:
+        plot_(DF, 'gold_price_usd', 'Wykres cen złota')
+    else:
+        print("Brak danych do wyświetlenia.")
 
+@cli.command()
+@click.pass_context
+def csv(ctx):
+    """
+    Zapisuje dane do pliku CSV.
+    """
+    DF = ctx.obj['DF']
+    if DF is not None:
+        DF.to_csv('gold_prices_usd.csv', index=False)
+        print("Dane zapisane do pliku 'gold_prices_usd.csv'")
+    else:
+        print("Brak danych do zapisania.")
 
+if __name__ == "__main__":
+    cli()
+
+# D:\IT\folder_do_cwiczen\ceny_zlota.py usd
