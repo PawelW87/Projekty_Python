@@ -138,7 +138,7 @@ if __name__ == "__main__":
     cli()
 
 
-# D:\IT\folder_do_cwiczen\M07_SQL.py report
-# D:\IT\folder_do_cwiczen\M07_SQL.py import-csv
-# D:\IT\folder_do_cwiczen\M07_SQL.py add
-# D:\IT\folder_do_cwiczen\M07_SQL.py delete
+# python D:\IT\folder_do_cwiczen\M07_SQL.py report
+# python D:\IT\folder_do_cwiczen\M07_SQL.py import-csv
+# python D:\IT\folder_do_cwiczen\M07_SQL.py add
+# python D:\IT\folder_do_cwiczen\M07_SQL.py delete

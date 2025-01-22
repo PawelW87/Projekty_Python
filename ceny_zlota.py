@@ -14,7 +14,7 @@ def fetch_gold_price_in_pln(from_date, to_date):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        print("Gold data structure:", data)  # Diagnostyka
+        # print("Gold data structure:", data)  # Diagnostyka
         return data
     except requests.exceptions.RequestException as e:
         print(f"Błąd podczas pobierania cen złota: {e}")
@@ -30,7 +30,7 @@ def fetch_usd_exchange_rate(from_date, to_date):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        print("USD rates structure:", data)  # Diagnostyka
+        # print("USD rates structure:", data)  # Diagnostyka
         return data['rates']  # API NBP zwraca listę kursów w polu 'rates'
     except requests.exceptions.RequestException as e:
         print(f"Błąd podczas pobierania kursów USD/PLN: {e}")
@@ -46,32 +46,46 @@ def calculate_gold_price_in_usd(gold_prices, usd_rates):
     usd_df = pd.DataFrame(usd_rates)
     
     # Konwersja kolumny 'effectiveDate' w USD na typ datetime
-    gold_df['date'] = pd.to_datetime(gold_df['date'])
+    gold_df['data'] = pd.to_datetime(gold_df['data'])
     usd_df['effectiveDate'] = pd.to_datetime(usd_df['effectiveDate'])
 
     # Łączenie danych na podstawie dat
-    merged_df = pd.merge(gold_df, usd_df, left_on='date', right_on='effectiveDate', how='inner')
+    merged_df = pd.merge(gold_df, usd_df, left_on='data', right_on='effectiveDate', how='inner')
 
     # Obliczanie ceny złota w USD za uncję
     merged_df['gold_price_usd'] = (merged_df['cena'] / merged_df['mid']) * 31.1035
 
     # Zwrócenie wyników
-    return merged_df[['date', 'cena', 'mid', 'gold_price_usd']]
+    return merged_df[['data', 'cena', 'mid', 'gold_price_usd']]
 
-def plot_(DF, y_, title_):
+def plot_(DF, x_, y_, title_):
     """
+    Tworzy wykres liniowy na podstawie dostarczonych danych.
 
     Parameters:
-
-    DF: .
-    y_: 
-    title_: 
+    DF: pandas.DataFrame
+        DataFrame zawierający dane do wykresu.
+    x_: str
+        Nazwa kolumny w DataFrame użytej jako oś X.
+    y_: str
+        Nazwa kolumny w DataFrame użytej jako oś Y.
+    title_: str
+        Tytuł wykresu.
     """
-    fig = px.line(DF, x='effectiveDate', y=y_, title=title_)
+    fig = px.line(DF, x=x_, y=y_, title=title_)
     fig.show()
 
-# fig = px.line(result_df, x='date', y='gold_price_usd', title='Wykres cen złota')
+# fig = px.line(result_df, x='data', y='gold_price_usd', title='Wykres cen złota')
  
+# from_date = "2024-01-01"
+# to_date = "2024-12-30"
+
+    # Pobieranie danych
+# gold_prices = fetch_gold_price_in_pln(from_date, to_date)
+# usd_rates = fetch_usd_exchange_rate(from_date, to_date)
+# DF = calculate_gold_price_in_usd(gold_prices, usd_rates)
+# print(DF)
+# plot_(DF, 'data', 'gold_price_usd', 'Wykres cen złota')
 
 @click.group()
 @click.pass_context
@@ -94,8 +108,7 @@ def cli(ctx):
         ctx.obj['DF'] = calculate_gold_price_in_usd(gold_prices, usd_rates)
     else:
         print("Nie udało się pobrać danych.")
-    ctx.obj['DF'] = None  
-
+    
 @cli.command()
 @click.pass_context
 def usd(ctx):
@@ -104,7 +117,7 @@ def usd(ctx):
     """
     DF = ctx.obj['DF']
     if DF is not None:
-        plot_(DF, 'mid', 'Kurs USD/PLN w czasie')
+        plot_(DF, 'data', 'mid', 'Kurs USD/PLN w czasie')
     else:
         print("Brak danych do wyświetlenia.")
 
@@ -116,7 +129,7 @@ def gold(ctx):
     """
     DF = ctx.obj['DF']
     if DF is not None:
-        plot_(DF, 'gold_price_usd', 'Wykres cen złota')
+        plot_(DF, 'data', 'gold_price_usd', 'Wykres cen złota')
     else:
         print("Brak danych do wyświetlenia.")
 
@@ -136,4 +149,4 @@ def csv(ctx):
 if __name__ == "__main__":
     cli()
 
-# D:\IT\folder_do_cwiczen\ceny_zlota.py usd
+# python D:\IT\folder_do_cwiczen\ceny_zlota.py usd
