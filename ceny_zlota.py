@@ -75,18 +75,6 @@ def plot_(DF, x_, y_, title_):
     fig = px.line(DF, x=x_, y=y_, title=title_)
     fig.show()
 
-# fig = px.line(result_df, x='data', y='gold_price_usd', title='Wykres cen złota')
- 
-# from_date = "2024-01-01"
-# to_date = "2024-12-30"
-
-    # Pobieranie danych
-# gold_prices = fetch_gold_price_in_pln(from_date, to_date)
-# usd_rates = fetch_usd_exchange_rate(from_date, to_date)
-# DF = calculate_gold_price_in_usd(gold_prices, usd_rates)
-# print(DF)
-# plot_(DF, 'data', 'gold_price_usd', 'Wykres cen złota')
-
 @click.group()
 @click.pass_context
 def cli(ctx):
@@ -98,7 +86,7 @@ def cli(ctx):
 
     # Zakres dat
     from_date = "2024-01-01"
-    to_date = "2024-12-30"
+    to_date = "2024-12-31"
 
     # Pobieranie danych
     gold_prices = fetch_gold_price_in_pln(from_date, to_date)
