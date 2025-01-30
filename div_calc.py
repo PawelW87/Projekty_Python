@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from datetime import datetime, timedelta
+from datetime import timedelta
 from csv_1 import create_path_write
 
 
