@@ -1,5 +1,5 @@
 import glob
-from txt import ask_for_direction
+from txt import write_file
 
 path = './more_txt/*.txt'
 FOLDER = 'more_txt'
@@ -11,7 +11,7 @@ for f in glob.glob(path):
 
 print(content)
 
-ask_for_direction(content, FOLDER)
+write_file(content, FOLDER)
 
 
 
