@@ -6,13 +6,13 @@ from csv_1 import create_path_write
 
 def import_transactions(csv_file):
     """
-    Reads CSV. Creates DataFrame with useful columns. Converts 'When' column to datetime objects.
+    Reads CSV. Creates DataFrame with useful columns. Converts 'Time' column to datetime objects.
     """
-    columns_to_load = ['Symbol ID', 'Operation type', 'When', 'Sum', 'Asset', 'Comment']
+    columns_to_load = ['Time', 'Side', 'Symbol ID', 'ISIN', 'Currency', 'Quantity', 'Commission', 'Commission Currency', 'Traded Volume']
 
     df = pd.read_csv(csv_file, sep='\t', header=0, encoding='utf-16', usecols=columns_to_load)
     
-    df['When'] = pd.to_datetime(df['When'])
+    df['Time'] = pd.to_datetime(df['Time'])
 
     return df
 
@@ -59,8 +59,8 @@ def add_exchange_rate(row):
     Assigns the currency rate and date taken from the NBP
     """
 
-    currency = row['Asset']
-    date = row['When']
+    currency = row['Currency']
+    date = row['Time']
     
     if currency == 'PLN':
         rate = 1
@@ -70,7 +70,7 @@ def add_exchange_rate(row):
     
     return pd.Series([rate, rate_date])
 
-def write_to_csv(df, folder):
+def write_to_excel(df, folder):
     try:
         df.to_excel(create_path_write(folder), index=False, header=True)
         print(f"Writing successful")
@@ -81,6 +81,7 @@ def calc_the_tax(df):
     """
     Shows the difference between tax already paid and tax due. If greater than zero, additional payment in Poland must be made.
     """
+    pass  ##########DO ogarniecia 
     # Divides the DataFrame into rows with 'DIVIDEND' and rows with 'TAX' or 'US TAX'
     dividend_df = df[df['Operation type'] == 'DIVIDEND'][['Symbol ID', 'NBP Date', '19% TAX']]
     tax_df = df[df['Operation type'].isin(['TAX', 'US TAX'])][['Symbol ID', 'NBP Date', 'PLN Sum']]
@@ -97,36 +98,16 @@ def calc_the_tax(df):
 
     return df
 
-def check_tax_corrections(df):
-    """
-    Assigning the 'KOREKTA' word to the 'Dopłata' column if word 'recalculation' is in 'Comment'
-    """
-    df['Dopłata'] = df['Dopłata'].where(~df['Comment'].str.contains('recalculation', case=False), 'KOREKTA')
-    return df
-
-def show_FUNDING_WITHDRAWAL(df):
-    """
-    Present fundings and withdrawals
-    """
-    df_FUNDING_WITHDRAWAL = df[df['Operation type'].isin(['FUNDING/WITHDRAWAL'])].copy()  
-    total_sum = df_FUNDING_WITHDRAWAL['Sum'].sum()
-    print(df_FUNDING_WITHDRAWAL)
-    print(f"Suma wpłat i wypłat to: {total_sum} EUR")
-
 def main():
     FOLDER = 'csv_files'
-    csv_file = r'csv_files\div24.csv'
+    csv_file = r'csv_files\Akcje.csv'
     df = import_transactions(csv_file)
     # print(df.to_string()) ### Present all rows.
     # print(df)
-    # show_FUNDING_WITHDRAWAL(df)
-    df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])].copy()
-    df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
-    df_filtered['PLN Sum'] = df_filtered['NBP Rate'] * df_filtered['Sum']
-    df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
-    df_filtered2 = check_tax_corrections(calc_the_tax(df_filtered))
-    print(df_filtered2)
-    # write_to_csv(df_filtered2, FOLDER)
+    df[['NBP Rate', 'NBP Date']] = df.apply(add_exchange_rate, axis=1)
+    df['PLN Sum'] = df['NBP Rate'] * df['Traded Volume']
+    print(df)
+    write_to_excel(df, FOLDER)
 
 
 if __name__ == "__main__":

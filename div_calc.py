@@ -70,7 +70,7 @@ def add_exchange_rate(row):
     
     return pd.Series([rate, rate_date])
 
-def write_to_csv(df, folder):
+def write_to_excel(df, folder):
     try:
         df.to_excel(create_path_write(folder), index=False, header=True)
         print(f"Writing successful")
@@ -125,8 +125,8 @@ def main():
     df_filtered['PLN Sum'] = df_filtered['NBP Rate'] * df_filtered['Sum']
     df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
     df_filtered2 = check_tax_corrections(calc_the_tax(df_filtered))
-    print(df_filtered2)
-    # write_to_csv(df_filtered2, FOLDER)
+    # print(df_filtered2)
+    write_to_excel(df_filtered2, FOLDER)
 
 
 if __name__ == "__main__":
