@@ -153,23 +153,24 @@ def calculate_profit(df):
 
     for _, row in df.iterrows():
         symbol = row['Symbol ID']
-        
+        transaction_type = row['Side']
+        quantity = row['Quantity']
+        value = row['PLN Values minus costs']
         
         if symbol not in fifo_queues:
             fifo_queues[symbol] = []
 
-        if row['Side'] == 'buy':
+        if transaction_type == 'buy':
             # Add the buy transaction to the FIFO queue for the current Symbol ID
             fifo_queues[symbol].append({
-                'PLN Values minus costs': row['PLN Values minus costs'],
-                'Quantity': row['Quantity'],
-                'Time': row['Time']
-            })
+                'PLN Values minus costs': value,
+                'Quantity': quantity,
+                })
             profits.append(np.nan)  # For buys, profit is NaN (null)
         
-        elif row['Side'] == 'sell':
-            total_sell_value = row['PLN Values minus costs']
-            total_sell_quantity = row['Quantity']
+        elif transaction_type == 'sell':
+            total_sell_value = value
+            total_sell_quantity = quantity
             total_profit = 0
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
@@ -186,6 +187,9 @@ def calculate_profit(df):
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
                     total_profit += total_sell_value - (total_sell_quantity / buy_quantity) * buy_value
+                    buy_price = buy_value / buy_quantity
+                    buy_transaction['PLN Values minus costs'] -= total_sell_quantity * buy_price
+                    buy_transaction['Quantity'] -= total_sell_quantity
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     break
             
