@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import requests
 from datetime import timedelta
@@ -130,6 +131,73 @@ def calculate_pln_values(df):
     
     return df
 
+def calculate_profit(df):
+    """
+    Calculates the profit for each 'sell' transaction by matching it with previous 'buy' transactions
+    using FIFO principle. The function calculates profit for each sale as the difference between the 
+    sale value and the corresponding buy value for each unique 'Symbol ID'.
+
+    Adds a new column 'Profit' to the DataFrame, where for 'buy' transactions the value is 'null',
+    and for 'sell' transactions the value is the calculated profit.
+
+    Args:
+        df (pandas.DataFrame): DataFrame with stock market transaction data including 'PLN Values minus costs',
+        'Side', 'Time', 'Symbol ID', 'Quantity' and other relevant columns.
+
+    Returns:
+        pandas.DataFrame: The updated DataFrame with the added 'Profit' column.
+    """
+    # Dictionary to store the FIFO queue for each Symbol ID
+    fifo_queues = {}
+    profits = []  # To store the profit for each transaction
+
+    for _, row in df.iterrows():
+        symbol = row['Symbol ID']
+        
+        
+        if symbol not in fifo_queues:
+            fifo_queues[symbol] = []
+
+        if row['Side'] == 'buy':
+            # Add the buy transaction to the FIFO queue for the current Symbol ID
+            fifo_queues[symbol].append({
+                'PLN Values minus costs': row['PLN Values minus costs'],
+                'Quantity': row['Quantity'],
+                'Time': row['Time']
+            })
+            profits.append(np.nan)  # For buys, profit is NaN (null)
+        
+        elif row['Side'] == 'sell':
+            total_sell_value = row['PLN Values minus costs']
+            total_sell_quantity = row['Quantity']
+            total_profit = 0
+
+            # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
+            while fifo_queues[symbol] and total_sell_quantity > 0:
+                buy_transaction = fifo_queues[symbol].pop(0)  # Get the oldest buy transaction
+                buy_value = buy_transaction['PLN Values minus costs']
+                buy_quantity = buy_transaction['Quantity']
+                
+                # Calculate the proportional buy value based on the quantity being sold
+                if buy_quantity <= total_sell_quantity:
+                    # If buy quantity is smaller or equal to the quantity sold
+                    total_profit += total_sell_value - (total_sell_quantity / buy_quantity) * buy_value
+                    total_sell_quantity -= buy_quantity
+                else:
+                    # If buy quantity is larger, adjust the remaining sell quantity
+                    total_profit += total_sell_value - (total_sell_quantity / buy_quantity) * buy_value
+                    fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
+                    break
+            
+            profits.append(total_profit)
+        else:
+            profits.append(np.nan)  # In case there's an invalid 'Side' value
+
+    df['Profit'] = profits
+    return df
+
+
+
 def main():
     FOLDER = 'csv_files'
     csv_file = r'csv_files\Akcje.csv'
@@ -137,6 +205,7 @@ def main():
     add_exchange_rate(df)
     calculate_pln_values(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
+    df = calculate_profit(df)
     # print(df)
     print(df.to_string()) ### Present all rows.
     # write_to_excel(df, FOLDER)
