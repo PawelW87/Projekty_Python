@@ -29,6 +29,6 @@ calculate_pln_values(df)
 
 calculate_profit(df)
 
-# print(df)
+print(df)
 # write_to_excel(df, FOLDER)
 
