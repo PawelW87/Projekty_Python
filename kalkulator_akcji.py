@@ -1,8 +1,15 @@
+import os
 import pandas as pd
 import requests
 from datetime import timedelta
-from csv_1 import create_path_write
 
+def create_path_write(folder):
+    """
+    Takes filename from user.
+    """
+    filename = input("Enter the name of the file to write (without extension): ") + '.xls'
+    path = os.path.join(folder, filename)
+    return path
 
 def import_transactions(csv_file):
     """
@@ -54,7 +61,7 @@ def get_nbp_exchange_rate(currency, date):
     rate_date = (data["rates"][0]['effectiveDate'])
     return rate, rate_date
 
-def add_exchange_rate(row):
+def download_exchange_rate(row):
     """
     Assigns the currency rate and date taken from the NBP
     """
@@ -77,37 +84,62 @@ def write_to_excel(df, folder):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def calc_the_tax(df):
+def add_exchange_rate(df):
     """
-    Shows the difference between tax already paid and tax due. If greater than zero, additional payment in Poland must be made.
+    Adds the NBP exchange rate and the exchange rate date to the DataFrame.
+
+    The function calls `download_exchange_rate` for each row,
+    to fill the 'NBP Rate' and 'NBP Date' columns.
+
+    Args:
+    df (pd.DataFrame): DataFrame with stock market transaction data.
+
+    Returns:
+    pd.DataFrame: Updated DataFrame with added columns.
     """
-    pass  ##########DO ogarniecia 
-    # Divides the DataFrame into rows with 'DIVIDEND' and rows with 'TAX' or 'US TAX'
-    dividend_df = df[df['Operation type'] == 'DIVIDEND'][['Symbol ID', 'NBP Date', '19% TAX']]
-    tax_df = df[df['Operation type'].isin(['TAX', 'US TAX'])][['Symbol ID', 'NBP Date', 'PLN Sum']]
+    df[['NBP Rate', 'NBP Date']] = df.apply(download_exchange_rate, axis=1)
+    return df
 
-    # Joines 'DIVIDEND' rows with 'TAX/US TAX' rows based on Symbol ID and NBP Date
-    merged_df = pd.merge(dividend_df, tax_df, on=['Symbol ID', 'NBP Date'], how='left')
+def calculate_pln_values(df):
+    """
+    Calculates and adds columns to the DataFrame representing financial values in PLN (Polish Zloty).
+    
+    The function performs the following operations:
+    1. Calculates 'PLN Traded Volume' by multiplying the 'NBP Rate' with 'Traded Volume'.
+    2. Calculates 'PLN Commission' based on the 'NBP Rate' and 'Commission', if the 'Currency' matches the 'Commission Currency'.
+       Otherwise, it returns 'Currency error'.
+    3. Calculates 'PLN Values minus costs' by adjusting the 'PLN Traded Volume' with the 'PLN Commission'.
+       The result is different for 'buy' and 'sell' sides: for 'buy', it adds the values, while for 'sell', it subtracts them.
+       If the 'Side' is not 'buy' or 'sell', it returns 'Calculation error'.
+    
+    Args:
+        df (pandas.DataFrame): A DataFrame containing columns 'NBP Rate', 'Traded Volume', 'Currency', 'Commission Currency', 'Commission', and 'Side'.
+    
+    Returns:
+        pandas.DataFrame: The updated DataFrame with the added columns 'PLN Traded Volume', 'PLN Commission', and 'PLN Values minus costs'.
+    """
+    df['PLN Traded Volume'] = df['NBP Rate'] * df['Traded Volume']
+    
+    df['PLN Commission'] = df.apply(
+    lambda row: row['NBP Rate'] * row['Commission'] if row['Currency'] == row['Commission Currency'] else 'Currency error',
+    axis=1)
 
-    # Calculates the sum between '19% TAX' (DIVIDEND) and 'PLN Sum' (TAX/US TAX)
-    merged_df['Dopłata'] = merged_df['19% TAX'] + merged_df['PLN Sum']
-
-    # Merges the results with the original table
-    df = pd.merge(df, merged_df[['Symbol ID', 'NBP Date', 'Dopłata']], on=['Symbol ID', 'NBP Date'], how='left')
-    df.loc[df['Operation type'] != 'DIVIDEND', 'Dopłata'] = None
-
+    df['PLN Values minus costs'] = df.apply(
+    lambda row: row['PLN Traded Volume'] + row['PLN Commission'] if row['Side'] == 'buy' else 
+    (row['PLN Traded Volume'] - row['PLN Commission'] if row['Side'] == 'sell' else 'Calculation error'), axis=1)
+    
     return df
 
 def main():
     FOLDER = 'csv_files'
     csv_file = r'csv_files\Akcje.csv'
     df = import_transactions(csv_file)
-    # print(df.to_string()) ### Present all rows.
+    add_exchange_rate(df)
+    calculate_pln_values(df)
+    df = df.sort_values(by=['Symbol ID', 'Time'])
     # print(df)
-    df[['NBP Rate', 'NBP Date']] = df.apply(add_exchange_rate, axis=1)
-    df['PLN Sum'] = df['NBP Rate'] * df['Traded Volume']
-    print(df)
-    write_to_excel(df, FOLDER)
+    print(df.to_string()) ### Present all rows.
+    # write_to_excel(df, FOLDER)
 
 
 if __name__ == "__main__":
