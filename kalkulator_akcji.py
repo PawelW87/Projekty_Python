@@ -162,13 +162,13 @@ def calculate_profit(df):
 
         if transaction_type == 'buy':
             # Add the buy transaction to the FIFO queue for the current Symbol ID
-            print("BUY", fifo_queues)
+            print("BUY-;przed", fifo_queues)
             fifo_queues[symbol].append({
                 'PLN Values minus costs': value,
                 'Quantity': quantity,
                 })
             profits.append(np.nan)  # For buys, profit is NaN (null)
-            print("BUY", fifo_queues)
+            print("BUY-po", fifo_queues)
         elif transaction_type == 'sell':
             total_sell_value = value
             total_sell_quantity = quantity
@@ -182,20 +182,20 @@ def calculate_profit(df):
                 
                 # Calculate the proportional buy value based on the quantity being sold
                 if buy_quantity <= total_sell_quantity:
-                    print("SELL-IF", fifo_queues)
+                    print("SELL-IF-przed", fifo_queues)
                     # If buy quantity is smaller or equal to the quantity sold
                     total_profit += total_sell_value - (total_sell_quantity / buy_quantity) * buy_value
                     total_sell_quantity -= buy_quantity
-                    print("SELL-IF", fifo_queues)
+                    print("SELL-IF-po", fifo_queues)
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
-                    print("SELL-ELSE", fifo_queues)
+                    print("SELL-ELSE-przed", fifo_queues)
                     total_profit += total_sell_value - (total_sell_quantity / buy_quantity) * buy_value
                     buy_price = buy_value / buy_quantity
                     buy_transaction['PLN Values minus costs'] -= total_sell_quantity * buy_price
                     buy_transaction['Quantity'] -= total_sell_quantity
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
-                    print("SELL-ELSE", fifo_queues)
+                    print("SELL-ELSE-po", fifo_queues)
                     break
             
             profits.append(total_profit)
