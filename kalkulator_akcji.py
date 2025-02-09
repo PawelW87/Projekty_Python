@@ -162,13 +162,11 @@ def calculate_profit(df):
 
         if transaction_type == 'buy':
             # Add the buy transaction to the FIFO queue for the current Symbol ID
-            print("BUY-;przed", fifo_queues)
             fifo_queues[symbol].append({
                 'PLN Values minus costs': value,
                 'Quantity': quantity,
                 })
             profits.append(np.nan)  # For buys, profit is NaN (null)
-            print("BUY-po", fifo_queues)
         elif transaction_type == 'sell':
             total_sell_value = value
             total_sell_quantity = quantity
@@ -179,30 +177,21 @@ def calculate_profit(df):
                 buy_transaction = fifo_queues[symbol].pop(0)  # Get the oldest buy transaction
                 buy_value = buy_transaction['PLN Values minus costs']
                 buy_quantity = buy_transaction['Quantity']
-                print("while", fifo_queues)
+                print("while", buy_transaction)
                 super_total_sell_quantity = quantity
                 
                 # Calculate the proportional buy value based on the quantity being sold
                 if buy_quantity <= total_sell_quantity:
-                    print("SELL-IF-przed", fifo_queues, 'zysk:', total_profit)
-                    print(f"super_total:{super_total_sell_quantity}, total sell value:{total_sell_value}, total sell quantity:{total_sell_quantity}, buy quantity:{buy_quantity}, buy value:{buy_value}")
                     # If buy quantity is smaller or equal to the quantity sold
                     total_profit += (total_sell_value * (buy_quantity / super_total_sell_quantity)) - buy_value
                     total_sell_quantity -= buy_quantity
-                    print("SELL-IF-po", fifo_queues, 'zysk:', total_profit)
-                    print(f"super_total:{super_total_sell_quantity}, total sell value:{total_sell_value}, total sell quantity:{total_sell_quantity}, buy quantity:{buy_quantity}, buy value:{buy_value}")
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
-                    print("SELL-ELSE-przed", fifo_queues, 'zysk:', total_profit)
-                    print(f"super_total:{super_total_sell_quantity}, total sell value:{total_sell_value}, total sell quantity:{total_sell_quantity}, buy quantity:{buy_quantity}, buy value:{buy_value}")
-                    
                     total_profit += total_sell_value * (total_sell_quantity / super_total_sell_quantity) - (total_sell_quantity / buy_quantity) * buy_value
                     buy_price = buy_value / buy_quantity
                     buy_transaction['PLN Values minus costs'] -= total_sell_quantity * buy_price
                     buy_transaction['Quantity'] -= total_sell_quantity
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
-                    print("SELL-ELSE-po", fifo_queues, 'zysk:', total_profit)
-                    print(f"super_total:{super_total_sell_quantity}, total sell value:{total_sell_value}, total sell quantity:{total_sell_quantity}, buy quantity:{buy_quantity}, buy value:{buy_value}")
                     break
             
             profits.append(total_profit)
