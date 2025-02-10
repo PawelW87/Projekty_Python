@@ -150,7 +150,7 @@ def calculate_profit(df):
     # Dictionary to store the FIFO queue for each Symbol ID
     fifo_queues = {}
     profits = []  # To store the profit for each transaction
-
+   
     for _, row in df.iterrows():
         symbol = row['Symbol ID']
         transaction_type = row['Side']
@@ -167,24 +167,25 @@ def calculate_profit(df):
                 'Quantity': quantity,
                 })
             profits.append(np.nan)  # For buys, profit is NaN (null)
+            
         elif transaction_type == 'sell':
             total_sell_value = value
             total_sell_quantity = quantity
             total_profit = 0
-            
+            super_total_sell_quantity = quantity
+
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
             while fifo_queues[symbol] and total_sell_quantity > 0:
                 buy_transaction = fifo_queues[symbol].pop(0)  # Get the oldest buy transaction
                 buy_value = buy_transaction['PLN Values minus costs']
                 buy_quantity = buy_transaction['Quantity']
-                print("while", buy_transaction)
-                super_total_sell_quantity = quantity
-                
+                                            
                 # Calculate the proportional buy value based on the quantity being sold
                 if buy_quantity <= total_sell_quantity:
                     # If buy quantity is smaller or equal to the quantity sold
                     total_profit += (total_sell_value * (buy_quantity / super_total_sell_quantity)) - buy_value
                     total_sell_quantity -= buy_quantity
+                    
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
                     total_profit += total_sell_value * (total_sell_quantity / super_total_sell_quantity) - (total_sell_quantity / buy_quantity) * buy_value
@@ -202,11 +203,9 @@ def calculate_profit(df):
     
     return df
 
-
 def main():
     FOLDER = 'csv_files'
     csv_file = r'csv_files\Akcje.csv'
-    # csv_file = r'csv_files\test_data.csv'
     df = import_transactions(csv_file)
     add_exchange_rate(df)
     calculate_pln_values(df)
@@ -215,7 +214,6 @@ def main():
     # print(df)
     # print(df.to_string()) ### Present all rows.
     write_to_excel(df, FOLDER)
-
 
 if __name__ == "__main__":
     main()

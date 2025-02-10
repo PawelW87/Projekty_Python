@@ -2,6 +2,8 @@ import pandas as pd
 from kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel
 
 FOLDER = 'csv_files'
+ # def report_():
+    #     print(f"cała kolejka:{fifo_queues},\n Oldest_transakcja kupna:{buy_transaction},\n zysk:{profits}, zysk_total:{total_profit}, ilość super_sprzedaży:{super_total_sell_quantity}, wartość sprzedaży:{total_sell_value}, ilość sprzedana:{total_sell_quantity},\n wartość kupna:{buy_value}, ilość kupna:{buy_quantity} ")
 
 data = {
     "Time": [
@@ -29,6 +31,6 @@ calculate_pln_values(df)
 
 calculate_profit(df)
 
-print(df)
+# print(df)
 # write_to_excel(df, FOLDER)
 
