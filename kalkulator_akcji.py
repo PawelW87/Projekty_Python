@@ -21,7 +21,7 @@ def import_transactions(csv_file):
     columns_to_load = ['Time', 'Side', 'Symbol ID', 'ISIN', 'Currency', 'Quantity', 'Commission', 'Commission Currency', 'Traded Volume']
 
     df = pd.read_csv(csv_file, sep='\t', header=0, encoding='utf-16', usecols=columns_to_load)
-    
+
     df['Time'] = pd.to_datetime(df['Time'])
     
     return df  
@@ -169,7 +169,7 @@ def add_manual_transaction(df):
         # Concatenate the new transaction to the DataFrame
         df = pd.concat([df, new_transaction], ignore_index=True)
         
-        print("Transaction added successfully.")
+        print(f"Transaction added successfully.\nDetails:\n{new_transaction}")
     
     return df
 
@@ -250,15 +250,14 @@ def main():
     # csv_file = r'csv_files\Akcje.csv'
     csv_file = input("Enter the path to the CSV file: ").strip()
     df = import_transactions(csv_file)
-    df = timedelta_(df)
     add_exchange_rate(df)
     calculate_pln_values(df)
     df = add_manual_transaction(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
     df = calculate_profit(df)
     # print(df)
-    # print(df.to_string()) ### Present all rows.
-    write_to_excel(df, FOLDER)
+    print(df.to_string()) ### Present all rows.
+    # write_to_excel(df, FOLDER)
 
 if __name__ == "__main__":
     main()

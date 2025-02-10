@@ -27,11 +27,10 @@ data = {
 df = pd.DataFrame(data)
 df['Time'] = pd.to_datetime(df['Time'])
 add_exchange_rate(df)
-add_manual_transaction(df)
 calculate_pln_values(df)
-
+add_manual_transaction(df)
+df = df.sort_values(by=['Symbol ID', 'Time'])
 calculate_profit(df)
-
-# print(df)
+print(df)
 # write_to_excel(df, FOLDER)
 
