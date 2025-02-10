@@ -22,11 +22,9 @@ def import_transactions(csv_file):
 
     df = pd.read_csv(csv_file, sep='\t', header=0, encoding='utf-16', usecols=columns_to_load)
     
-    return df
-
-def timedelta_(df):
     df['Time'] = pd.to_datetime(df['Time'])
-    return df
+    
+    return df  
 
 def get_nbp_exchange_rate(currency, date):
 

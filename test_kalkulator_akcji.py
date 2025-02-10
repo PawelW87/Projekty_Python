@@ -1,5 +1,5 @@
 import pandas as pd
-from kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel
+from kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel, add_manual_transaction
 
 FOLDER = 'csv_files'
  # def report_():
@@ -27,6 +27,7 @@ data = {
 df = pd.DataFrame(data)
 df['Time'] = pd.to_datetime(df['Time'])
 add_exchange_rate(df)
+add_manual_transaction(df)
 calculate_pln_values(df)
 
 calculate_profit(df)
