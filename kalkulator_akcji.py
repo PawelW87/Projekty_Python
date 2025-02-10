@@ -135,6 +135,46 @@ def calculate_pln_values(df):
     
     return df
 
+def add_manual_transaction(df):
+    """
+    Allows the user to manually add a transaction to the DataFrame.
+    This function now ensures that missing columns (such as 'NBP Rate', 'NBP Date', etc.)
+    are added to the manually entered rows.
+    """
+    while True:
+        add_transaction = input("Do you want to add a manual transaction? (yes/no): ").strip().lower()
+        
+        if add_transaction == 'no':
+            break
+        
+        symbol_id = input("Enter Symbol ID: ").strip()
+        time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
+        time = pd.to_datetime(time_str)
+        quantity = float(input("Enter Quantity: "))
+        pln_values = float(input("Enter PLN Values minus costs: "))
+        
+        # Create a new DataFrame for the new transaction with columns required by other functions
+        new_transaction = pd.DataFrame({
+            'Symbol ID': [symbol_id],
+            'Time': [time],
+            'Side': ['buy'],
+            'Quantity': [quantity],
+            'PLN Values minus costs': [pln_values],
+            'Currency': ['---'],  # Assuming PLN currency for the transaction
+            'Commission': [0],
+            'Commission Currency': ['---'],
+            'Traded Volume': [0],
+            'NBP Rate': [1],  # Set default exchange rate as 1 for PLN (since it's in PLN)
+            'NBP Date': [time.date()]  # Use the entered time as the exchange rate date
+        })
+
+        # Concatenate the new transaction to the DataFrame
+        df = pd.concat([df, new_transaction], ignore_index=True)
+        
+        print("Transaction added successfully.")
+    
+    return df
+
 def calculate_profit(df):
     """
     Calculates the profit for each 'sell' transaction by matching it with previous 'buy' transactions
@@ -209,11 +249,13 @@ def calculate_profit(df):
 
 def main():
     FOLDER = 'csv_files'
-    csv_file = r'csv_files\Akcje.csv'
+    # csv_file = r'csv_files\Akcje.csv'
+    csv_file = input("Enter the path to the CSV file: ").strip()
     df = import_transactions(csv_file)
     df = timedelta_(df)
     add_exchange_rate(df)
     calculate_pln_values(df)
+    df = add_manual_transaction(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
     df = calculate_profit(df)
     # print(df)
