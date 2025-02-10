@@ -4,6 +4,8 @@ import pandas as pd
 import requests
 from datetime import timedelta
 
+
+
 def create_path_write(folder):
     """
     Takes filename from user.
@@ -20,8 +22,10 @@ def import_transactions(csv_file):
 
     df = pd.read_csv(csv_file, sep='\t', header=0, encoding='utf-16', usecols=columns_to_load)
     
-    df['Time'] = pd.to_datetime(df['Time'])
+    return df
 
+def timedelta_(df):
+    df['Time'] = pd.to_datetime(df['Time'])
     return df
 
 def get_nbp_exchange_rate(currency, date):
@@ -207,6 +211,7 @@ def main():
     FOLDER = 'csv_files'
     csv_file = r'csv_files\Akcje.csv'
     df = import_transactions(csv_file)
+    df = timedelta_(df)
     add_exchange_rate(df)
     calculate_pln_values(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
