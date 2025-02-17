@@ -229,7 +229,7 @@ def calculate_profit(df):
                 'PLN Commission': commission,
                 })
             profits.append(np.nan)
-            costs.append(np.nan)  # For buys, profit and costs are NaN (null)
+            costs.append(np.nan)  # For buys, profit and cost is NaN (null)
             
         elif transaction_type == 'sell':
             total_sell_value = value
@@ -246,31 +246,32 @@ def calculate_profit(df):
                 buy_quantity = buy_transaction['Quantity']
                 buy_commission = buy_transaction['PLN Commission']
                                             
-                ######### Calculate the proportional buy value based on the quantity being sold
                 if buy_quantity <= total_sell_quantity:
                     # If buy quantity is smaller or equal to the quantity sold
-                    total_cost += buy_value + (buy_quantity / super_total_sell_quantity * total_sell_commission) + buy_commission
-                    total_profit += ((buy_quantity / super_total_sell_quantity) * total_sell_value - total_cost)
-
-                    ###### total_profit += (total_sell_value * (buy_quantity / super_total_sell_quantity)) - buy_value
+                    total_cost += buy_value + buy_commission + (buy_quantity / super_total_sell_quantity) * total_sell_commission
+                    total_profit += (buy_quantity / super_total_sell_quantity) * total_sell_value - total_cost
                     total_sell_quantity -= buy_quantity
                     
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
-                    total_cost += (total_sell_quantity / super_total_sell_quantity * total_sell_commission) + (total_sell_quantity / super_total_sell_quantity * buy_commission) + (total_sell_quantity / super_total_sell_quantity * buy_value)
-
-                    # total_profit += total_sell_value * (total_sell_quantity / super_total_sell_quantity) - (total_sell_quantity / buy_quantity) * buy_value
-                    buy_price = buy_value / buy_quantity
-                    buy_transaction['PLN Traded Volume'] -= total_sell_quantity * buy_price
+                    total_cost += (total_sell_quantity / buy_quantity) * (buy_value + buy_commission) + (total_sell_quantity / super_total_sell_quantity) * total_sell_commission
+                    total_profit += (total_sell_quantity / super_total_sell_quantity) * total_sell_value - total_cost
+                    # Returns unsold units to the FIFO queue
+                    buy_transaction['PLN Traded Volume'] -= (total_sell_quantity / buy_quantity) * buy_value
                     buy_transaction['Quantity'] -= total_sell_quantity
+                    buy_transaction['PLN Commission'] -= (total_sell_quantity / buy_quantity) * buy_commission
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     break
             
             profits.append(total_profit)
+            costs.append(total_cost)
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
-
+            costs.append(np.nan)
+            
+    df['Costs'] = costs
     df['Profit'] = profits
+    
     
     return df
 
