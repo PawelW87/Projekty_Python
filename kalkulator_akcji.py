@@ -4,8 +4,6 @@ import pandas as pd
 import requests
 from datetime import timedelta
 
-
-
 def create_path_write(folder):
     """
     Takes filename from user.
@@ -64,7 +62,7 @@ def get_nbp_exchange_rate(currency, date):
     rate_date = (data["rates"][0]['effectiveDate'])
     return rate, rate_date
 
-def download_exchange_rate(row):
+def assign_exchange_rate(row):
     """
     Assigns the currency rate and date taken from the NBP
     """
@@ -91,7 +89,7 @@ def add_exchange_rate(df):
     """
     Adds the NBP exchange rate and the exchange rate date to the DataFrame.
 
-    The function calls `download_exchange_rate` for each row,
+    The function calls `assign_exchange_rate` for each row,
     to fill the 'NBP Rate' and 'NBP Date' columns.
 
     Args:
@@ -100,7 +98,7 @@ def add_exchange_rate(df):
     Returns:
     pd.DataFrame: Updated DataFrame with added columns.
     """
-    df[['NBP Rate', 'NBP Date']] = df.apply(download_exchange_rate, axis=1)
+    df[['NBP Rate', 'NBP Date']] = df.apply(assign_exchange_rate, axis=1)
     return df
 
 def calculate_pln_values(df):
@@ -136,40 +134,50 @@ def calculate_pln_values(df):
 def add_manual_transaction(df):
     """
     Allows the user to manually add a transaction to the DataFrame.
-    This function now ensures that missing columns (such as 'NBP Rate', 'NBP Date', etc.)
-    are added to the manually entered rows.
+    This feature now ensures that missing columns (such as purchases from previous years) are added to manually entered rows.
     """
     while True:
-        add_transaction = input("Do you want to add a manual transaction? (yes/no): ").strip().lower()
+        add_transaction = input("Do you want to add a manual transaction? (y/n): ").strip().lower()
         
-        if add_transaction == 'no':
+        if add_transaction == 'n':
             break
         
-        symbol_id = input("Enter Symbol ID: ").strip()
-        time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
-        time = pd.to_datetime(time_str)
-        quantity = float(input("Enter Quantity: "))
-        pln_values = float(input("Enter PLN Values minus costs: "))
-        
-        # Create a new DataFrame for the new transaction with columns required by other functions
-        new_transaction = pd.DataFrame({
-            'Symbol ID': [symbol_id],
-            'Time': [time],
-            'Side': ['buy'],
-            'Quantity': [quantity],
-            'PLN Values minus costs': [pln_values],
-            'Currency': ['---'],  # Assuming PLN currency for the transaction
-            'Commission': [0],
-            'Commission Currency': ['---'],
-            'Traded Volume': [0],
-            'NBP Rate': [1],  # Set default exchange rate as 1 for PLN (since it's in PLN)
-            'NBP Date': [time.date()]  # Use the entered time as the exchange rate date
-        })
+        try:
+            symbol_id = input("Enter Symbol ID: ").strip().upper()
+            time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
+            time = pd.to_datetime(time_str)
+            quantity = float(input("Enter Quantity: "))
+            pln_values = float(input("Enter PLN Values minus costs: "))
+            
+            # Create a new DataFrame for the new transaction with columns required by other functions
+            new_transaction = pd.DataFrame({
+                'Symbol ID': [symbol_id],
+                'Time': [time],
+                'Side': ['buy'],
+                'Quantity': [quantity],
+                'PLN Values minus costs': [pln_values],
+                'Currency': ['PLN'],  # Assuming PLN currency for the transaction
+                'Commission': [0],
+                'Commission Currency': ['PLN'],
+                'Traded Volume': [0],
+                'NBP Rate': [1],  # Set default exchange rate as 1 for PLN (since it's in PLN)
+                'NBP Date': [time.date()]  # Use the entered time as the exchange rate date
+            })
 
-        # Concatenate the new transaction to the DataFrame
-        df = pd.concat([df, new_transaction], ignore_index=True)
-        
-        print(f"Transaction added successfully.\nDetails:\n{new_transaction}")
+            # Display transaction details for confirmation
+            print(f"Transaction Details:")
+            print(new_transaction.to_string(index=False))
+            confirm = input("Confirm this transaction? (y/n): ").strip().lower()
+            
+            if confirm == 'y':
+                df = pd.concat([df, new_transaction], ignore_index=True)
+                print("Transaction added successfully.\n")
+            else:
+                print("Transaction discarded.\n")
+
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+            print("Please try again and ensure all fields are entered correctly.\n")
     
     return df
 
