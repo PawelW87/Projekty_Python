@@ -103,35 +103,41 @@ def add_exchange_rate(df):
 
 def calculate_pln_values(df):
     """
-    Calculates and adds columns to the DataFrame representing financial values in PLN (Polish Zloty).
-    
-    The function performs the following operations:
-    1. Calculates 'PLN Traded Volume' by multiplying the 'NBP Rate' with 'Traded Volume'.
-    2. Calculates 'PLN Commission' based on the 'NBP Rate' and 'Commission', if the 'Currency' matches the 'Commission Currency'.
-       Otherwise, it returns 'Currency error'.
-    3. Calculates 'PLN Values minus costs' by adjusting the 'PLN Traded Volume' with the 'PLN Commission'.
-       The result is different for 'buy' and 'sell' sides: for 'buy', it adds the values, while for 'sell', it subtracts them.
-       If the 'Side' is not 'buy' or 'sell', it returns 'Calculation error'.
-    
-    Args:
-        df (pandas.DataFrame): A DataFrame containing columns 'NBP Rate', 'Traded Volume', 'Currency', 'Commission Currency', 'Commission', and 'Side'.
-    
+    Calculates PLN-related financial values for a given DataFrame.
+
+    This function adds the following columns to the DataFrame:
+    - 'PLN Traded Volume': The traded volume converted to PLN using the NBP exchange rate.
+    - 'PLN Commission': The commission converted to PLN based on the NBP rate, 
+      with validation that the currency matches the commission currency.
+      If the currencies do not match, an error message 'Currency error' is added.
+    - 'PLN INCOME': The traded volume in PLN for rows where the 'Side' is 'sell'; 
+      for other rows, this value is set to 0.
+
+    Parameters:
+    ----------
+    df : pandas.DataFrame
+        The input DataFrame containing the transaction data. 
+        Required columns: 
+        - 'NBP Rate'
+        - 'Traded Volume'
+        - 'Commission'
+        - 'Currency'
+        - 'Commission Currency'
+        - 'Side'
+
     Returns:
-        pandas.DataFrame: The updated DataFrame with the added columns 'PLN Traded Volume', 'PLN Commission', and 'PLN Values minus costs'.
+    -------
+    pandas.DataFrame
+        The updated DataFrame with the calculated columns.
     """
     df['PLN Traded Volume'] = df['NBP Rate'] * df['Traded Volume']
     
     df['PLN Commission'] = df.apply(
     lambda row: row['NBP Rate'] * row['Commission'] if row['Currency'] == row['Commission Currency'] else 'Currency error',
     axis=1)
-
-    df['PLN Values minus costs'] = df.apply(
-    lambda row: row['PLN Traded Volume'] + row['PLN Commission'] if row['Side'] == 'buy' else 
-    (row['PLN Traded Volume'] - row['PLN Commission'] if row['Side'] == 'sell' else 'Calculation error'), axis=1)
     
     df['PLN INCOME'] = np.where(df['Side'] == 'sell', df['PLN Traded Volume'], 0)
 
-    
     return df
 
 def add_manual_transaction(df):
@@ -150,7 +156,7 @@ def add_manual_transaction(df):
             time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
             time = pd.to_datetime(time_str)
             quantity = float(input("Enter Quantity: "))
-            pln_values = float(input("Enter PLN Values minus costs: "))
+            pln_values = float(input("Enter PLN Traded Volume: "))
             
             # Create a new DataFrame for the new transaction with columns required by other functions
             new_transaction = pd.DataFrame({
