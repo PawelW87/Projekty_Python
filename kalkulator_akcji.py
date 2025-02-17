@@ -210,12 +210,13 @@ def calculate_profit(df):
     # Dictionary to store the FIFO queue for each Symbol ID
     fifo_queues = {}
     profits = []  # To store the profit for each transaction
-   
+    costs = []
     for _, row in df.iterrows():
         symbol = row['Symbol ID']
         transaction_type = row['Side']
         quantity = row['Quantity']
-        value = row['PLN Values minus costs']
+        value = row['PLN Traded Volume']
+        commission = row['PLN Commission']
         
         if symbol not in fifo_queues:
             fifo_queues[symbol] = []
@@ -223,34 +224,44 @@ def calculate_profit(df):
         if transaction_type == 'buy':
             # Add the buy transaction to the FIFO queue for the current Symbol ID
             fifo_queues[symbol].append({
-                'PLN Values minus costs': value,
+                'PLN Traded Volume': value,
                 'Quantity': quantity,
+                'PLN Commission': commission,
                 })
-            profits.append(np.nan)  # For buys, profit is NaN (null)
+            profits.append(np.nan)
+            costs.append(np.nan)  # For buys, profit and costs are NaN (null)
             
         elif transaction_type == 'sell':
             total_sell_value = value
             total_sell_quantity = quantity
+            total_sell_commission = commission
             total_profit = 0
+            total_cost = 0
             super_total_sell_quantity = quantity
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
             while fifo_queues[symbol] and total_sell_quantity > 0:
                 buy_transaction = fifo_queues[symbol].pop(0)  # Get the oldest buy transaction
-                buy_value = buy_transaction['PLN Values minus costs']
+                buy_value = buy_transaction['PLN Traded Volume']
                 buy_quantity = buy_transaction['Quantity']
+                buy_commission = buy_transaction['PLN Commission']
                                             
-                # Calculate the proportional buy value based on the quantity being sold
+                ######### Calculate the proportional buy value based on the quantity being sold
                 if buy_quantity <= total_sell_quantity:
                     # If buy quantity is smaller or equal to the quantity sold
-                    total_profit += (total_sell_value * (buy_quantity / super_total_sell_quantity)) - buy_value
+                    total_cost += buy_value + (buy_quantity / super_total_sell_quantity * total_sell_commission) + buy_commission
+                    total_profit += ((buy_quantity / super_total_sell_quantity) * total_sell_value - total_cost)
+
+                    ###### total_profit += (total_sell_value * (buy_quantity / super_total_sell_quantity)) - buy_value
                     total_sell_quantity -= buy_quantity
                     
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
-                    total_profit += total_sell_value * (total_sell_quantity / super_total_sell_quantity) - (total_sell_quantity / buy_quantity) * buy_value
+                    total_cost += (total_sell_quantity / super_total_sell_quantity * total_sell_commission) + (total_sell_quantity / super_total_sell_quantity * buy_commission) + (total_sell_quantity / super_total_sell_quantity * buy_value)
+
+                    # total_profit += total_sell_value * (total_sell_quantity / super_total_sell_quantity) - (total_sell_quantity / buy_quantity) * buy_value
                     buy_price = buy_value / buy_quantity
-                    buy_transaction['PLN Values minus costs'] -= total_sell_quantity * buy_price
+                    buy_transaction['PLN Traded Volume'] -= total_sell_quantity * buy_price
                     buy_transaction['Quantity'] -= total_sell_quantity
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     break
