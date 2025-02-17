@@ -16,7 +16,7 @@ def import_transactions(csv_file):
     """
     Reads CSV. Creates DataFrame with useful columns. Converts 'Time' column to datetime objects.
     """
-    columns_to_load = ['Time', 'Side', 'Symbol ID', 'ISIN', 'Currency', 'Quantity', 'Commission', 'Commission Currency', 'Traded Volume']
+    columns_to_load = ['Time', 'Side', 'Symbol ID', 'ISIN', 'Price', 'Currency', 'Quantity', 'Commission', 'Commission Currency', 'Traded Volume']
 
     df = pd.read_csv(csv_file, sep='\t', header=0, encoding='utf-16', usecols=columns_to_load)
 
@@ -128,6 +128,9 @@ def calculate_pln_values(df):
     df['PLN Values minus costs'] = df.apply(
     lambda row: row['PLN Traded Volume'] + row['PLN Commission'] if row['Side'] == 'buy' else 
     (row['PLN Traded Volume'] - row['PLN Commission'] if row['Side'] == 'sell' else 'Calculation error'), axis=1)
+    
+    df['PLN INCOME'] = np.where(df['Side'] == 'sell', df['PLN Traded Volume'], 0)
+
     
     return df
 
