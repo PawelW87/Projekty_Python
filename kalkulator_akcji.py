@@ -270,8 +270,8 @@ def calculate_profit(df):
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
 
-    df['Costs'] = costs
-    df['Profit'] = profits
+    df['COSTS'] = costs
+    df['PROFIT'] = profits
     
     
     return df
