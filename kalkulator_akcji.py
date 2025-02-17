@@ -193,19 +193,20 @@ def add_manual_transaction(df):
 
 def calculate_profit(df):
     """
-    Calculates the profit for each 'sell' transaction by matching it with previous 'buy' transactions
-    using FIFO principle. The function calculates profit for each sale as the difference between the 
-    sale value and the corresponding buy value for each unique 'Symbol ID'.
+    Calculates the profit and costs for 'sell' transactions using the FIFO principle to match them 
+    with previous 'buy' transactions for each unique 'Symbol ID'.
 
-    Adds a new column 'Profit' to the DataFrame, where for 'buy' transactions the value is 'null',
-    and for 'sell' transactions the value is the calculated profit.
+    For each 'sell', the function computes the profit as the difference between the sell value and 
+    the matched buy costs, including proportional commissions. Adds two new columns to the DataFrame:
+        - 'Costs': Total costs (including commissions) for each transaction.
+        - 'Profit': Profit for 'sell' transactions (NaN for 'buy').
 
     Args:
-        df (pandas.DataFrame): DataFrame with stock market transaction data including 'PLN Values minus costs',
-        'Side', 'Time', 'Symbol ID', 'Quantity' and other relevant columns.
+        df (pandas.DataFrame): DataFrame containing columns:
+            'Symbol ID', 'Side', 'Quantity', 'PLN Traded Volume', and 'PLN Commission'.
 
     Returns:
-        pandas.DataFrame: The updated DataFrame with the added 'Profit' column.
+        pandas.DataFrame: Updated DataFrame with 'Profit' and 'Costs' columns.
     """
     # Dictionary to store the FIFO queue for each Symbol ID
     fifo_queues = {}
@@ -268,7 +269,7 @@ def calculate_profit(df):
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
-            
+
     df['Costs'] = costs
     df['Profit'] = profits
     
