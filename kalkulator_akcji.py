@@ -170,7 +170,7 @@ def add_manual_transaction(df):
                 'Commission Currency': ['PLN'],
                 'Traded Volume': [0],
                 'NBP Rate': [1],  # Set default exchange rate as 1 for PLN (since it's in PLN)
-                'NBP Date': ['---']  # Use the entered time as the exchange rate date
+                'NBP Date': ['---'],  # Use the entered time as the exchange rate date
                 'Price': [0]
             })
 
