@@ -157,20 +157,21 @@ def add_manual_transaction(df):
             time = pd.to_datetime(time_str)
             quantity = float(input("Enter Quantity: "))
             pln_values = float(input("Enter PLN Traded Volume: "))
-            
+            commision = float(input("Enter PLN Commission: "))
             # Create a new DataFrame for the new transaction with columns required by other functions
             new_transaction = pd.DataFrame({
                 'Symbol ID': [symbol_id],
                 'Time': [time],
                 'Side': ['buy'],
                 'Quantity': [quantity],
-                'PLN Values minus costs': [pln_values],
+                'PLN Traded Volume': [pln_values],
                 'Currency': ['PLN'],  # Assuming PLN currency for the transaction
-                'Commission': [0],
+                'PLN Commission': [commision],
                 'Commission Currency': ['PLN'],
                 'Traded Volume': [0],
                 'NBP Rate': [1],  # Set default exchange rate as 1 for PLN (since it's in PLN)
-                'NBP Date': [time.date()]  # Use the entered time as the exchange rate date
+                'NBP Date': ['---']  # Use the entered time as the exchange rate date
+                'Price': [0]
             })
 
             # Display transaction details for confirmation
