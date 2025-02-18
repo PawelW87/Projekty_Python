@@ -236,7 +236,6 @@ def calculate_profit(df):
             total_sell_value = value
             total_sell_quantity = quantity
             total_sell_commission = commission
-            total_profit = 0
             total_cost = 0
             super_total_sell_quantity = quantity
 
@@ -249,26 +248,15 @@ def calculate_profit(df):
                                             
                 if buy_quantity <= total_sell_quantity:
                     # If buy quantity is smaller or equal to the quantity sold
-                    print(f"IFprzed FIFO:{buy_transaction}")
-                    total_cost += buy_value + buy_commission + (buy_quantity / super_total_sell_quantity) * total_sell_commission
-                    # chyba źle total_profit += (buy_quantity / super_total_sell_quantity) * total_sell_value - total_cost
-                    
-                    print(f"IF PO cost:{total_cost}, profit{total_profit}\n, total_sell:{total_sell_quantity}, super total:{super_total_sell_quantity}\n, buy value:{buy_value}, buy commission:{buy_commission}")
-                    print(f"buy quantity:{buy_quantity}, total sell commission{total_sell_commission}, total_sell_value:{total_sell_value}\n")
-
+                    total_cost += buy_value + buy_commission + (buy_quantity / super_total_sell_quantity) * total_sell_commission       
                     total_sell_quantity -= buy_quantity
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
-                    print(f"ELSEprzed FIFO:{buy_transaction}")
                     total_cost += (total_sell_quantity / buy_quantity) * (buy_value + buy_commission) + (total_sell_quantity / super_total_sell_quantity) * total_sell_commission
-                    # total_profit += (total_sell_quantity / super_total_sell_quantity) * total_sell_value - total_cost
                     # Returns unsold units to the FIFO queue
                     buy_transaction['PLN Traded Volume'] -= (total_sell_quantity / buy_quantity) * buy_value
                     buy_transaction['Quantity'] -= total_sell_quantity
                     buy_transaction['PLN Commission'] -= (total_sell_quantity / buy_quantity) * buy_commission
-                    print(f"ELSE PO back buy transakction: {buy_transaction}")
-                    print(f"cost:{total_cost}, profit{total_profit}\n, total_sell:{total_sell_quantity}, super total:{super_total_sell_quantity}\n, buy value:{buy_value}, buy commission:{buy_commission}")
-                    print(f"buy quantity:{buy_quantity}, total sell commission{total_sell_commission}, total_sell_value:{total_sell_value},\n,\n,\n,")
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     break
             
@@ -281,8 +269,7 @@ def calculate_profit(df):
 
     df['COSTS'] = costs
     df['PROFIT'] = profits
-    
-    
+        
     return df
 
 def main():

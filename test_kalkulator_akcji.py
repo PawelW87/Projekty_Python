@@ -34,3 +34,19 @@ calculate_profit(df)
 print(df)
 write_to_excel(df, FOLDER)
 
+
+
+####### Printy przydatne do diagnozy
+
+# chyba źle total_profit += (buy_quantity / super_total_sell_quantity) * total_sell_value - total_cost
+# total_profit += (total_sell_quantity / super_total_sell_quantity) * total_sell_value - total_cost
+
+# print(f"IFprzed FIFO:{buy_transaction}")
+# print(f"IF PO cost:{total_cost}, profit{total_profit}\n, total_sell:{total_sell_quantity}, super total:{super_total_sell_quantity}\n, buy value:{buy_value}, buy commission:{buy_commission}")
+# print(f"buy quantity:{buy_quantity}, total sell commission{total_sell_commission}, total_sell_value:{total_sell_value}\n")
+
+# print(f"ELSEprzed FIFO:{buy_transaction}")
+
+# print(f"ELSE PO back buy transakction: {buy_transaction}")
+# print(f"cost:{total_cost}, profit{total_profit}\n, total_sell:{total_sell_quantity}, super total:{super_total_sell_quantity}\n, buy value:{buy_value}, buy commission:{buy_commission}")
+# print(f"buy quantity:{buy_quantity}, total sell commission{total_sell_commission}, total_sell_value:{total_sell_value},\n,\n,\n,")
