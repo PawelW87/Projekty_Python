@@ -14,14 +14,14 @@ data = {
         "2025-02-04T09:30:00",
         "2025-02-04T16:10:00",
     ],
-    "Side": ["buy", "sell", "buy", "buy", "sell", "sell"],
+    "Side": ["buy", "buy", "buy", "buy", "sell", "sell"],
     "Symbol ID": ["ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "ABC123"],
     "ISIN": ["PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890"],
     "Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
-    "Quantity": [100, 50, 200, 150, 50, 250],
-    "Commission": [1.50, 0.75, 2.00, 1.75, 0.60, 2.20],
+    "Quantity": [100, 50, 200, 50, 125, 265],
+    "Commission": [1.0, 1.0, 2.00, 1.0, 1.25, 2.65],
     "Commission Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
-    "Traded Volume": [10000, 5000, 20000, 15000, 5000, 25000],
+    "Traded Volume": [10000, 4900, 18000, 4900, 12375, 37100],
 }
 
 df = pd.DataFrame(data)
@@ -32,5 +32,5 @@ add_manual_transaction(df)
 df = df.sort_values(by=['Symbol ID', 'Time'])
 calculate_profit(df)
 print(df)
-# write_to_excel(df, FOLDER)
+write_to_excel(df, FOLDER)
 
