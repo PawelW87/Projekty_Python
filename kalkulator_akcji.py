@@ -274,7 +274,6 @@ def calculate_profit(df):
 
 def main():
     FOLDER = 'csv_files'
-    # csv_file = r'csv_files\Akcje.csv'
     csv_file = input("Enter the path to the CSV file: ").strip()
     df = import_transactions(csv_file)
     add_exchange_rate(df)
@@ -282,9 +281,8 @@ def main():
     df = add_manual_transaction(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
     df = calculate_profit(df)
-    # print(df)
     print(df.to_string()) ### Present all rows.
-    # write_to_excel(df, FOLDER)
+    write_to_excel(df, FOLDER)
 
 if __name__ == "__main__":
     main()
