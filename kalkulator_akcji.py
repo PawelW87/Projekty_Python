@@ -274,18 +274,18 @@ def calculate_profit(df):
 
 def map_exchange_to_country(df):
     """
-    Maps the stock exchange identifier in the symbol ID to a country code.
+    Maps stock exchange identifiers to country codes based on the 'Side' column value.
+
+    If the 'Side' column is 'sell', the function extracts the exchange from the 'Symbol ID'
+    and returns the corresponding country code. If 'Side' is not 'sell', it returns None.
 
     Args:
-        symbol_id (str): The symbol ID of a financial instrument (e.g., "DNP.WSE").
+        df (pandas.DataFrame): A DataFrame containing the 'Symbol ID' and 'Side' columns.
 
     Returns:
-        str: The country code (e.g., "PL" for Poland) or "UNKNOWN" if not found.
-
-    Example:
-        >>> map_exchange_to_country("DNP.WSE")
-        'PL'
+        pandas.DataFrame: The original DataFrame with an additional 'Exchange country' column.
     """
+
     exchange_to_country = {
         "WSE": "PL",
         "EURONEXT": "Check",
