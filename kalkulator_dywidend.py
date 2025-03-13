@@ -1,8 +1,7 @@
+import os
 import pandas as pd
 import requests
 from datetime import timedelta
-from csv_1 import create_path_write
-
 
 def import_transactions(csv_file):
     """
@@ -70,6 +69,38 @@ def add_exchange_rate(row):
     
     return pd.Series([rate, rate_date])
 
+def extract_dividend_info(df):
+    """
+    Extracts and adds two new columns to the given DataFrame based on the information in the 'Comment' column.
+
+    - The column 'DIV paid' is extracted from the text enclosed in parentheses after "(-" in the 'Comment' column. 
+      The extracted value represents the percentage of the dividend paid (e.g., "-15.000%"), excluding the parentheses.
+    - The column 'DIV Country' is extracted from the keyword "DivCntry" in the 'Comment' column, capturing the country code 
+      (e.g., "US" or "DE") that follows it.
+
+    Args:
+        df (pandas.DataFrame): A DataFrame containing a column named 'Comment' with dividend-related information.
+
+    Returns:
+        pandas.DataFrame: The modified DataFrame with two additional columns:
+            - 'DIV paid %': Contains the dividend percentage paid as a string.
+            - 'DIV Country': Contains the country code of the dividend as a string.
+    """
+    df['DIV paid %'] = df['Comment'].apply(
+    lambda comment: comment[comment.find("(-") + 2:comment.find(")", comment.find("(-"))]
+    if "(-" in comment else None
+)
+    df['DIV Country'] = df['Comment'].str.extract(r'DivCntry (\w+)')
+    return df
+
+def create_path_write(folder):
+    """
+    Takes filename from user.
+    """
+    filename = input("Enter the name of the file to write (without extension): ") + '.xlsx'
+    path = os.path.join(folder, filename)
+    return path
+
 def write_to_excel(df, folder):
     try:
         df.to_excel(create_path_write(folder), index=False, header=True)
@@ -79,21 +110,45 @@ def write_to_excel(df, folder):
 
 def calc_the_tax(df):
     """
-    Shows the difference between tax already paid and tax due. If greater than zero, additional payment in Poland must be made.
+    Processes a DataFrame to calculate additional columns related to dividends and taxes.
+
+    - Divides the DataFrame into rows with 'DIVIDEND' and rows with 'TAX' or 'US TAX'.
+    - Joins 'DIVIDEND' rows with 'TAX/US TAX' rows based on 'Symbol ID' and 'NBP Date'.
+    - Calculates the sum of '19% TAX' and 'PLN Sum' to create the 'Dopłata' column.
+    - Adds a new column 'DIV paid' that maps the 'PLN Sum' from 'TAX/US TAX' rows to 'DIVIDEND' rows.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame containing columns:
+            - 'Operation type'
+            - 'Symbol ID'
+            - 'NBP Date'
+            - '19% TAX'
+            - 'PLN Sum'
+
+    Returns:
+        pandas.DataFrame: The modified DataFrame with additional columns:
+            - 'Dopłata': Sum of '19% TAX' and 'PLN Sum' for 'DIVIDEND' rows.
+            - 'DIV paid': The 'PLN Sum' from 'TAX/US TAX' rows displayed for 'DIVIDEND' rows.
     """
-    # Divides the DataFrame into rows with 'DIVIDEND' and rows with 'TAX' or 'US TAX'
+
+    # Separate rows for 'DIVIDEND' and 'TAX/US TAX'
     dividend_df = df[df['Operation type'] == 'DIVIDEND'][['Symbol ID', 'NBP Date', '19% TAX']]
     tax_df = df[df['Operation type'].isin(['TAX', 'US TAX'])][['Symbol ID', 'NBP Date', 'PLN Sum']]
 
-    # Joines 'DIVIDEND' rows with 'TAX/US TAX' rows based on Symbol ID and NBP Date
+    # Join 'DIVIDEND' rows with 'TAX/US TAX' rows
     merged_df = pd.merge(dividend_df, tax_df, on=['Symbol ID', 'NBP Date'], how='left')
 
-    # Calculates the sum between '19% TAX' (DIVIDEND) and 'PLN Sum' (TAX/US TAX)
+    # Calculate 'Dopłata'
     merged_df['Dopłata'] = merged_df['19% TAX'] + merged_df['PLN Sum']
 
-    # Merges the results with the original table
-    df = pd.merge(df, merged_df[['Symbol ID', 'NBP Date', 'Dopłata']], on=['Symbol ID', 'NBP Date'], how='left')
-    df.loc[df['Operation type'] != 'DIVIDEND', 'Dopłata'] = None
+    # Add 'DIV paid' column for 'DIVIDEND' rows
+    merged_df['DIV paid'] = merged_df['PLN Sum']
+
+    # Merge the results back into the original DataFrame
+    df = pd.merge(df, merged_df[['Symbol ID', 'NBP Date', 'DIV paid', 'Dopłata']], on=['Symbol ID', 'NBP Date'], how='left')
+
+    # Ensure 'Dopłata' and 'DIV paid' are only for 'DIVIDEND' rows
+    df.loc[df['Operation type'] != 'DIVIDEND', ['DIV paid', 'Dopłata']] = None
 
     return df
 
@@ -122,10 +177,11 @@ def main():
     # show_FUNDING_WITHDRAWAL(df)
     df_filtered = df[df['Operation type'].isin(['DIVIDEND', 'TAX', 'US TAX'])].copy()
     df_filtered[['NBP Rate', 'NBP Date']] = df_filtered.apply(add_exchange_rate, axis=1)
+    df_filtered = extract_dividend_info(df_filtered)
     df_filtered['PLN Sum'] = df_filtered['NBP Rate'] * df_filtered['Sum']
     df_filtered.loc[df_filtered['Operation type'] == 'DIVIDEND', '19% TAX'] = df_filtered['PLN Sum'] * 0.19
     df_filtered2 = check_tax_corrections(calc_the_tax(df_filtered))
-    # print(df_filtered2)
+    print(df_filtered2)
     write_to_excel(df_filtered2, FOLDER)
 
 
