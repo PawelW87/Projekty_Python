@@ -136,7 +136,7 @@ def calculate_pln_values(df):
     lambda row: row['NBP Rate'] * row['Commission'] if row['Currency'] == row['Commission Currency'] else 'Currency error',
     axis=1)
     
-    df['PLN INCOME'] = np.where(df['Side'] == 'sell', df['PLN Traded Volume'], 0)
+    df['PLN INCOME - PRZYCHÓD'] = np.where(df['Side'] == 'sell', df['PLN Traded Volume'], 0)
 
     return df
 
@@ -267,9 +267,50 @@ def calculate_profit(df):
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
 
-    df['COSTS'] = costs
-    df['PROFIT'] = profits
+    df['COSTS - KOSZT'] = costs
+    df['PROFIT - DOCHÓD'] = profits
         
+    return df
+
+def map_exchange_to_country(df):
+    """
+    Maps the stock exchange identifier in the symbol ID to a country code.
+
+    Args:
+        symbol_id (str): The symbol ID of a financial instrument (e.g., "DNP.WSE").
+
+    Returns:
+        str: The country code (e.g., "PL" for Poland) or "UNKNOWN" if not found.
+
+    Example:
+        >>> map_exchange_to_country("DNP.WSE")
+        'PL'
+    """
+    exchange_to_country = {
+        "WSE": "PL",
+        "EURONEXT": "Check",
+        "XETRA": "DE",
+        "NYSE": "US",
+        "NASDAQ": "US",
+        "BATS": "US",
+        "AMEX": "US",
+        "ARCA": "US",
+        "SIX": "CH",
+        "LSE": "GB",
+        "SOMX": "SE",
+        "TSX": "CA",
+        "ASX": "AU",    
+    }
+    
+    def get_country(row):
+        if row['Side'] == 'sell':
+            exchange = row['Symbol ID'].split('.')[-1]
+            return exchange_to_country.get(exchange, "UNKNOWN")
+        else:
+            return None
+    
+    df['Exchange country'] = df.apply(get_country, axis=1)
+
     return df
 
 def main():
@@ -281,7 +322,8 @@ def main():
     df = add_manual_transaction(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
     df = calculate_profit(df)
-    print(df.to_string()) ### Present all rows.
+    df = map_exchange_to_country(df)
+    # print(df.to_string()) ### Present all rows.
     write_to_excel(df, FOLDER)
 
 if __name__ == "__main__":
