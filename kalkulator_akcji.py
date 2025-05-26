@@ -249,7 +249,7 @@ def calculate_profit(df):
                 warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")
                 profits.append(None)
                 costs.append(None)
-                status.append(None)
+                status.append("Failure")
                 continue
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID

@@ -33,7 +33,7 @@ add_manual_transaction(df)
 df = df.sort_values(by=['Symbol ID', 'Time'])
 calculate_profit(df)
 print(df)
-write_to_excel(df, FOLDER)
+# write_to_excel(df, FOLDER)
 
 
 
