@@ -211,8 +211,10 @@ def calculate_profit(df):
     # Dictionary to store the FIFO queue for each Symbol ID
     fifo_queues = {}
     profits = []  # To store the profit for each transaction
-    costs = []
-    status = []
+    costs = []  # To store the cost for each transaction
+    status = [] # To store the status for 'sell' transaction
+    warnings = []   # To track missing 'buy' for 'sell' transactions
+
     for _, row in df.iterrows():
         symbol = row['Symbol ID']
         transaction_type = row['Side']
@@ -233,6 +235,7 @@ def calculate_profit(df):
             profits.append(np.nan)
             costs.append(np.nan)
             status.append(np.nan)  # For buys, profit, cost and status is NaN (null)
+            warnings.append(None)
             
         elif transaction_type == 'sell':
             total_sell_value = value
@@ -240,6 +243,14 @@ def calculate_profit(df):
             total_sell_commission = commission
             total_cost = 0
             super_total_sell_quantity = quantity
+            
+            if not fifo_queues[symbol]:
+                # If no 'buy' transactions are available
+                warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")
+                profits.append(None)
+                costs.append(None)
+                status.append(None)
+                continue
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
             while fifo_queues[symbol] and total_sell_quantity > 0:
@@ -252,7 +263,7 @@ def calculate_profit(df):
                     # If buy quantity is smaller or equal to the quantity sold
                     total_cost += buy_value + buy_commission + (buy_quantity / super_total_sell_quantity) * total_sell_commission       
                     total_sell_quantity -= buy_quantity
-                    summary = 'Rozliczone'
+                    summary = 'Settled'
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
                     total_cost += (total_sell_quantity / buy_quantity) * (buy_value + buy_commission) + (total_sell_quantity / super_total_sell_quantity) * total_sell_commission
@@ -261,21 +272,24 @@ def calculate_profit(df):
                     buy_transaction['Quantity'] -= total_sell_quantity
                     buy_transaction['PLN Commission'] -= (total_sell_quantity / buy_quantity) * buy_commission
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
-                    
-                    summary = f"Pozostało: {sum(transaction['Quantity'] for transaction in fifo_queues[symbol])}"
+                    summary = f"Remains: {sum(transaction['Quantity'] for transaction in fifo_queues[symbol])}"
                     break
             
             profits.append(total_sell_value - total_cost)
             costs.append(total_cost)
             status.append(summary)
+            warnings.append(None)
+
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
             status.append(np.nan)
+            warnings.append(None)
 
     df['COSTS - KOSZT'] = costs
     df['PROFIT - DOCHÓD'] = profits
     df['STATUS'] = status
+    df['Warnings'] = warnings
         
     return df
 
