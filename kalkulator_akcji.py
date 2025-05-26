@@ -233,8 +233,8 @@ def calculate_profit(df):
                 'PLN Commission': commission,
                 })
             profits.append(np.nan)
-            costs.append(np.nan)
-            status.append(np.nan)  # For buys, profit, cost and status is NaN (null)
+            costs.append(np.nan)    # For buys, profit and cost is NaN (null)
+            status.append(None)  
             warnings.append(None)
             
         elif transaction_type == 'sell':
@@ -243,7 +243,7 @@ def calculate_profit(df):
             total_sell_commission = commission
             total_cost = 0
             super_total_sell_quantity = quantity
-            
+
             if not fifo_queues[symbol]:
                 # If no 'buy' transactions are available
                 warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")
@@ -283,7 +283,7 @@ def calculate_profit(df):
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
-            status.append(np.nan)
+            status.append(None)
             warnings.append(None)
 
     df['COSTS - KOSZT'] = costs
