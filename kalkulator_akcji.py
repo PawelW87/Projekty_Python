@@ -260,7 +260,6 @@ def calculate_profit(df):
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     break
             
-            # profits.append(total_profit)
             profits.append(total_sell_value - total_cost)
             costs.append(total_cost)
         else:
