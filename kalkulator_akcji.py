@@ -212,6 +212,7 @@ def calculate_profit(df):
     fifo_queues = {}
     profits = []  # To store the profit for each transaction
     costs = []
+    status = []
     for _, row in df.iterrows():
         symbol = row['Symbol ID']
         transaction_type = row['Side']
@@ -230,7 +231,8 @@ def calculate_profit(df):
                 'PLN Commission': commission,
                 })
             profits.append(np.nan)
-            costs.append(np.nan)  # For buys, profit and cost is NaN (null)
+            costs.append(np.nan)
+            status.append(np.nan)  # For buys, profit, cost and status is NaN (null)
             
         elif transaction_type == 'sell':
             total_sell_value = value
@@ -250,6 +252,7 @@ def calculate_profit(df):
                     # If buy quantity is smaller or equal to the quantity sold
                     total_cost += buy_value + buy_commission + (buy_quantity / super_total_sell_quantity) * total_sell_commission       
                     total_sell_quantity -= buy_quantity
+                    summary = 'Rozliczone'
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
                     total_cost += (total_sell_quantity / buy_quantity) * (buy_value + buy_commission) + (total_sell_quantity / super_total_sell_quantity) * total_sell_commission
@@ -258,16 +261,21 @@ def calculate_profit(df):
                     buy_transaction['Quantity'] -= total_sell_quantity
                     buy_transaction['PLN Commission'] -= (total_sell_quantity / buy_quantity) * buy_commission
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
+                    
+                    summary = f"Pozostało: {sum(transaction['Quantity'] for transaction in fifo_queues[symbol])}"
                     break
             
             profits.append(total_sell_value - total_cost)
             costs.append(total_cost)
+            status.append(summary)
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
+            status.append(np.nan)
 
     df['COSTS - KOSZT'] = costs
     df['PROFIT - DOCHÓD'] = profits
+    df['STATUS'] = status
         
     return df
 
