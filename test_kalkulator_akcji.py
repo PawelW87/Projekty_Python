@@ -14,16 +14,21 @@ data = {
         "2025-02-04T09:30:00",
         "2025-02-04T16:10:00",
         "2025-02-06T16:10:00",
+        "2025-02-08T16:10:00",
+        "2025-02-09T16:10:00",
     ],
-    "Side": ["buy", "buy", "buy", "buy", "sell", "sell", "sell"],
-    "Symbol ID": ["ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "XYZ"],
-    "ISIN": ["PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL12345"],
-    "Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
-    "Quantity": [100, 50, 200, 50, 125, 265, 100],
-    "Commission": [1.0, 1.0, 2.00, 1.0, 1.25, 2.65, 5.0],
-    "Commission Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
-    "Traded Volume": [10000, 4900, 18000, 4900, 12375, 37100, 5000],
+    "Side": ["buy", "buy", "buy", "buy", "sell", "sell", "sell", "buy", "sell"],
+    "Symbol ID": ["ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "XYZ", "ZL123", "ZL123"],
+    "ISIN": ["PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL12345", "PUPA1", "PUPA1"],
+    "Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
+    "Quantity": [100, 50, 200, 50, 125, 265, 100, 50, 100],
+    "Commission": [1.0, 1.0, 2.00, 1.0, 1.25, 2.65, 5.0, 1.0, 2.0],
+    "Commission Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
+    "Traded Volume": [10000, 4900, 18000, 4900, 12375, 37100, 5000, 10000, 20000],
 }
+
+# for key, value in data.items():                               # do sprawdzenia ilości kolumn
+#     print(f"Kolumna '{key}': długość = {len(value)}")
 
 df = pd.DataFrame(data)
 df['Time'] = pd.to_datetime(df['Time'])
@@ -33,7 +38,7 @@ add_manual_transaction(df)
 df = df.sort_values(by=['Symbol ID', 'Time'])
 calculate_profit(df)
 print(df)
-# write_to_excel(df, FOLDER)
+write_to_excel(df, FOLDER)
 
 
 

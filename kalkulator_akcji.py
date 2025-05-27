@@ -243,13 +243,21 @@ def calculate_profit(df):
             total_sell_commission = commission
             total_cost = 0
             super_total_sell_quantity = quantity
+            total_buy_quantity = sum(transaction['Quantity'] for transaction in fifo_queues[symbol])
 
             if not fifo_queues[symbol]:
                 # If no 'buy' transactions are available
-                warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")
                 profits.append(None)
                 costs.append(None)
                 status.append("Failure")
+                warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")          
+                continue
+
+            if total_buy_quantity < quantity:
+                profits.append(None)
+                costs.append(None)
+                status.append("Check")
+                warnings.append(f"Not enough 'buy' for 'sell' transaction of {quantity} units in {symbol} for {total_buy_quantity} buys.")
                 continue
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
