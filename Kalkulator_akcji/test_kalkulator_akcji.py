@@ -1,7 +1,7 @@
 import pandas as pd
 from Kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel, add_manual_transaction
 
-FOLDER = 'csv_files'
+FOLDER = 'csv_files' # Folder for new .xlsx file
  # def report_():
     #     print(f"cała kolejka:{fifo_queues},\n Oldest_transakcja kupna:{buy_transaction},\n zysk:{profits}, zysk_total:{total_profit}, ilość super_sprzedaży:{super_total_sell_quantity}, wartość sprzedaży:{total_sell_value}, ilość sprzedana:{total_sell_quantity},\n wartość kupna:{buy_value}, ilość kupna:{buy_quantity} ")
 
@@ -20,11 +20,11 @@ data = {
     "Side": ["buy", "buy", "buy", "buy", "sell", "sell", "sell", "buy", "sell"],
     "Symbol ID": ["ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "ABC123", "XYZ", "ZL123", "ZL123"],
     "ISIN": ["PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL1234567890", "PL12345", "PUPA1", "PUPA1"],
-    "Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
+    "Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "USD", "PLN", "PLN"],
     "Quantity": [100, 50, 200, 50, 125, 265, 100, 50, 100],
     "Commission": [1.0, 1.0, 2.00, 1.0, 1.25, 2.65, 5.0, 1.0, 2.0],
-    "Commission Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "PLN"],
-    "Traded Volume": [10000, 4900, 18000, 4900, 12375, 37100, 5000, 10000, 20000],
+    "Commission Currency": ["PLN", "PLN", "PLN", "PLN", "PLN", "PLN", "USD", "PLN", "PLN"],
+    "Traded Volume": [10000, 4900, 18000, 4900, 12375, 37100, 1000, 10000, 20000],
 }
 
 # for key, value in data.items():                               # do sprawdzenia ilości kolumn
@@ -38,7 +38,7 @@ add_manual_transaction(df)
 df = df.sort_values(by=['Symbol ID', 'Time'])
 calculate_profit(df)
 print(df)
-write_to_excel(df, FOLDER)
+# write_to_excel(df, FOLDER)
 
 
 
