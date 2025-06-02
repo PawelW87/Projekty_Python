@@ -1,3 +1,17 @@
+"""
+Ten program analizuje ceny złota w PLN za gram oraz kurs USD/PLN na podstawie danych pobranych z API NBP. 
+Program umożliwia:
+
+1. Pobranie danych o cenach złota w PLN oraz kursach USD/PLN dla określonego zakresu dat.
+2. Przekształcenie cen złota w PLN na ceny w USD za uncję przy użyciu kursów USD/PLN.
+3. Wizualizację:
+   - Wykres kursu USD/PLN w czasie.
+   - Wykres cen złota w USD w czasie.
+4. Eksport przetworzonych danych do pliku CSV.
+
+Wykorzystuje biblioteki `requests`, `pandas`, `plotly` oraz `click` do realizacji funkcjonalności.
+"""
+
 import pandas as pd
 import plotly.express as px
 import requests

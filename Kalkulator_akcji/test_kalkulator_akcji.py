@@ -1,5 +1,5 @@
 import pandas as pd
-from kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel, add_manual_transaction
+from Kalkulator_akcji import add_exchange_rate, calculate_pln_values, calculate_profit, write_to_excel, add_manual_transaction
 
 FOLDER = 'csv_files'
  # def report_():
