@@ -1,6 +1,4 @@
-Tytuł projektu
-
-„Program do obliczania należnego podatku od zysków giełdowych, obsługujący pliki CSV od brokerów oraz transakcje z lat ubiegłych. Dodatkowy moduł testowy umożliwia weryfikację podstawowych funkcji programu.”
+To jest program do obliczania należnego podatku od zysków giełdowych, obsługujący pliki CSV od brokera Exante oraz transakcje z lat ubiegłych. Dodatkowy moduł testowy umożliwia weryfikację podstawowych funkcji programu. 
 
 Funkcjonalności:
 
@@ -94,7 +92,7 @@ Wywołuje funkcję get_nbp_exchange_rate, aby pobrać kurs z API NBP.
 Zwraca kurs i datę w formie serii Pandas.
 
 Opis funkcji: get_nbp_exchange_rate
-Cel: Pobiera kurs wymiany waluty z API NBP dla danego dnia lub najbliższego wcześniejszego dnia roboczego.
+Cel: Pobiera kurs wymiany waluty z API NBP dla poprzedniego dnia lub najbliższego wcześniejszego dnia roboczego.
 
 Szczegóły działania:
 Wejście:
@@ -198,59 +196,264 @@ Funkcja wymaga, aby wcześniej w DataFrame znajdowała się kolumna NBP Rate, ob
 
 Brak walidacji dla wartości wejściowych (np. czy Commission jest liczbą). Funkcja zakłada poprawność danych wejściowych.
 
-4. TU SKOŃCZYŁEM 02-06-2025
-____________________________________________________________________________________________________
 
-Rozliczanie transakcji giełdowych krajowych i zagranicznych.
+4. Opcjonalne ręczne wprowadzanie danych (add_manual_transaction).
 
-Automatyczne oznaczanie nierozliczonych pozycji do przeniesienia na kolejny rok.
+Pozwala użytkownikowi ręcznie dodać transakcję do DataFrame. Funkcja jest przydatna do wprowadzania transakcji niestandardowych, takich jak zakupy z lat poprzednich.
 
-Generowanie pliku .xlsx z gotowymi danymi do deklaracji podatkowej.
+Działanie funkcji:
+Pętla interaktywna:
 
-Moduł testowy do weryfikacji poprawności funkcji programu.
+Funkcja działa w pętli, pytając użytkownika, czy chce dodać nową transakcję.
+
+Opcje:
+
+y: Rozpoczyna proces dodawania transakcji.
+
+n: Przerywa działanie funkcji i zwraca DataFrame.
+
+Wprowadzanie danych:
+
+Użytkownik wprowadza szczegóły transakcji:
+
+Symbol ID: Unikalny identyfikator symbolu giełdowego.
+
+Time: Data i godzina transakcji w formacie YYYY-MM-DD HH:MM:SS.
+
+Quantity: Ilość instrumentów finansowych.
+
+PLN Traded Volume: Kwota transakcji przeliczona na PLN.
+
+PLN Commission: Prowizja transakcji w PLN.
+
+Tworzenie nowej transakcji:
+
+Nowa transakcja jest tworzona jako tymczasowy DataFrame z predefiniowanymi wartościami:
+
+Kolumny wymagane przez inne funkcje, takie jak NBP Rate, Currency, Commission Currency, są domyślnie uzupełniane (np. NBP Rate = 1 dla transakcji w PLN).
+
+Potwierdzenie transakcji:
+
+Użytkownik może zatwierdzić lub odrzucić wprowadzoną transakcję:
+
+y: Transakcja jest dodawana do głównego DataFrame.
+
+n: Transakcja zostaje odrzucona.
+
+Obsługa błędów:
+
+Funkcja wykrywa błędy wprowadzania danych (np. nieprawidłowy format daty lub liczby).
+
+W przypadku błędu użytkownik jest proszony o ponowne wprowadzenie danych.
+
+Parametry wejściowe:
+df: Główny DataFrame z istniejącymi transakcjami.
+
+Zwracane dane:
+Zaktualizowany DataFrame z ręcznie dodanymi transakcjami.
+
+Uwagi:
+Wszystkie ręcznie dodane transakcje zakładają, że waluta to PLN (ustawione domyślnie).
+
+Funkcja nie umożliwia edycji ani usuwania już dodanych transakcji – jedynie ich zatwierdzanie lub odrzucanie w momencie wprowadzania.
+
+Obsługa walut innych niż PLN wymagałaby dodatkowego mechanizmu weryfikacji i przeliczeń. Autor zakłada, że kursy ręcznie dodawanych transakcji zostały obliczone w ubiegłym roku.
+
+5. Obliczanie zysków i kosztów (Funkcja: calculate_profit)
+
+Cel:
+Oblicza zyski i koszty dla transakcji typu "sell", dopasowując je do wcześniejszych transakcji "buy" według zasady FIFO. Zysk jest różnicą między wartością sprzedaży a kosztami zakupu, uwzględniającymi proporcjonalne prowizje.
+
+Kroki działania funkcji:
+Tworzenie struktur pomocniczych:
+
+fifo_queues: Słownik przechowujący kolejki FIFO dla każdej unikalnej wartości Symbol ID.
+
+Listy: profits, costs, status, warnings do przechowywania wyników dla każdej transakcji.
+
+Iterowanie przez wiersze DataFrame:
+
+Dla każdej transakcji sprawdzane jest pole Side:
+
+buy:
+
+Transakcja dodawana do odpowiedniej kolejki FIFO.
+
+Zysk i koszt ustawiane na NaN.
+
+sell:
+
+Wartości transakcji "sell" są dopasowywane do "buy" z kolejki FIFO.
+
+Jeśli brakuje odpowiednich transakcji "buy", funkcja zgłasza ostrzeżenie.
+
+Koszty są wyliczane proporcjonalnie, uwzględniając prowizje.
+
+Obliczany jest zysk jako różnica wartości "sell" i kosztów.
+
+Inne wartości w Side:
+
+Zysk i koszt ustawiane na NaN, bez zmian w kolejce.
+
+Obsługa przypadku braku zakupów lub niedopasowania ilości:
+
+Jeśli dla "sell" nie ma odpowiednich "buy", funkcja dodaje wpis w kolumnie Warnings.
+
+Jeśli ilość w "buy" jest niewystarczająca, transakcja zostaje oznaczona jako Check.
+
+Dostosowanie transakcji "buy":
+
+W przypadku częściowego wykorzystania transakcji "buy", pozostała ilość jest zwracana do kolejki.
+
+Dodanie kolumn do DataFrame:
+
+COSTS - KOSZT: Koszty związane z transakcją.
+
+PROFIT - DOCHÓD: Zysk dla transakcji typu "sell".
+
+STATUS: Status przetwarzania transakcji.
+
+Warnings: Ostrzeżenia dotyczące braków lub błędów w dopasowaniu.
+
+Parametry:
+df: DataFrame zawierający kolumny:
+
+Symbol ID, Side, Quantity, PLN Traded Volume, PLN Commission.
+
+Zwracane dane:
+DataFrame: Oryginalny DataFrame uzupełniony o kolumny:
+
+COSTS - KOSZT, PROFIT - DOCHÓD, STATUS, Warnings.
+
+Uwagi:
+Funkcja zakłada, że dane wejściowe są poprawne, a transakcje "sell" nie przekraczają całkowitej ilości "buy" dla danego Symbol ID.
+
+Jeśli brakuje transakcji "buy" lub ilość jest niewystarczająca, użytkownik otrzyma ostrzeżenia w kolumnie Warnings.
+
+Rozliczanie prowizji uwzględnia proporcje między transakcjami "buy" i "sell".
+
+
+6. Przypisanie do dochodu symbolu kraju giełdy - zgodnie z wymogami dla rozliczeń z Urzędem skarbowym (map_exchange_to_country).
+
+Cel:
+Mapuje identyfikatory giełd papierów wartościowych (zawarte w Symbol ID) na kody krajów na podstawie transakcji typu "sell".
+
+Kroki działania funkcji:
+Tworzenie mapowania exchange_to_country:
+
+Słownik przypisuje identyfikator giełdy (np. "WSE", "XETRA") do kodu kraju (np. "PL", "DE").
+
+Dla nieznanych giełd funkcja zwróci "UNKNOWN".
+
+Niektóre giełdy wymagają weryfikacji ("Check").
+
+Definiowanie funkcji pomocniczej get_country:
+
+Sprawdza wartość w kolumnie Side:
+
+Jeśli wartość to "sell", funkcja wyodrębnia kod giełdy z pola Symbol ID (część po ostatniej kropce).
+
+Wyszukuje kod kraju w słowniku exchange_to_country. Jeśli kod giełdy nie istnieje w słowniku, zwraca "UNKNOWN".
+
+Jeśli Side różni się od "sell", funkcja zwraca None.
+
+Dodanie kolumny Exchange country:
+
+Funkcja apply() wywołuje get_country dla każdego wiersza, tworząc nową kolumnę z kodami krajów.
+
+Zwracany wynik:
+
+Oryginalny DataFrame z dodatkową kolumną Exchange country.
+
+Parametry:
+df: DataFrame zawierający kolumny:
+
+Symbol ID — identyfikator symbolu, w którym znajduje się giełda (np. "ABC.WSE").
+
+Side — typ transakcji (np. "buy", "sell").
+
+Zwracane dane:
+DataFrame: Zawiera oryginalne dane oraz kolumnę:
+
+Exchange country — kod kraju (np. "PL", "DE") lub None dla transakcji innych niż "sell".
+
+Przykład działania:
+Dane wejściowe:
+
+Symbol ID	Side
+ABC.WSE	sell
+DEF.XETRA	sell
+GHI.NASDAQ	buy
+
+Dane wyjściowe:
+
+Symbol ID	Side	Exchange country
+ABC.WSE	sell	PL
+DEF.XETRA	sell	DE
+GHI.NASDAQ	buy	None
+
+Uwagi:
+Funkcja zakłada, że Symbol ID zawsze zawiera kod giełdy po ostatniej kropce.
+
+Jeśli identyfikator giełdy nie istnieje w exchange_to_country, zwracane jest "UNKNOWN".
+
+Transakcje inne niż "sell" są ignorowane (kolumna Exchange country ma wartość None).
+
+
+7. Zapis DataFrame do pliku excel (write_to_excel i create_path_write).
+
+Cel: Zapisuje DataFrame do pliku Excel w folderze określonym przez użytkownika. Użytkownik podaje nazwę pliku w trakcie działania programu.
+
+Szczegóły implementacji:
+write_to_excel(df, folder):
+
+Funkcja zapisuje dany DataFrame do pliku Excel.
+
+Plik jest tworzony w folderze wskazanym w parametrze folder.
+
+Wywołuje funkcję pomocniczą create_path_write(folder) do uzyskania pełnej ścieżki do pliku.
+
+Obsługuje potencjalne wyjątki (np. błędy zapisu do pliku) i wyświetla odpowiedni komunikat.
+
+create_path_write(folder):
+
+Funkcja prosi użytkownika o nazwę pliku bez rozszerzenia.
+
+Dodaje rozszerzenie .xlsx do podanej nazwy.
+
+Łączy nazwę pliku z podanym folderem za pomocą os.path.join.
+
+Parametry:
+df: DataFrame do zapisania.
+
+folder: Ścieżka do folderu, w którym zostanie zapisany plik.
+
+Zwracane dane:
+Funkcja create_path_write zwraca pełną ścieżkę do pliku jako string.
+
+Funkcja write_to_excel nie zwraca wartości, lecz zapisuje plik w określonym miejscu.
+
+Uwagi:
+Obsługa błędów:
+
+Jeśli podana ścieżka jest nieprawidłowa (np. brak uprawnień zapisu), funkcja poinformuje o błędzie.
+
 
 Wymagania
 
-Wymień wymagania techniczne, np.:
-
 Python 3.10+
 
-Biblioteki: pandas, openpyxl, pytest (dla testów)
+Biblioteki: pandas, os, requests, numpy, datetime
 
-Struktura plików
+Pliki w projekcie:
 
-Wskaż, jakie pliki znajdują się w projekcie:
+Kalkulator_akcji.py - Główny program obsługujący dane giełdowe.
+README.md
+test_kalkulator_akcji.py - Testowy program zawierający dane do testowania strategicznych funkcji programu.
 
-main_program.py: Główny program obsługujący dane giełdowe.
+Autorstwo i kontakt:
+Stworzone przez Paweł Wojtyński.
 
-test_module.py: Moduł testowy weryfikujący działanie funkcji.
+## Licencja
 
-Instrukcja użytkowania
-
-Uruchamianie głównego programu
-Opisz, jak przygotować dane i uruchomić program, np.:
-
-bash
-Kopiuj
-Edytuj
-python main_program.py --input dane_brokera.csv --output podatek.xlsx
-
-Uruchamianie modułu testowego
-
-test_kalkulator_akcji.py
-
-Struktura danych wejściowych/wyjściowych
-
-Wyjaśnij format plików CSV i .xlsx:
-
-Dane wejściowe: Plik CSV od brokera (np. kolumny: Data, Instrument, Ilość, Cena, Waluta).
-
-Dane wyjściowe: Plik .xlsx (np. kolumny: Zysk/Strata, Podatek do zapłaty, Uwagi).
-
-Uwagi i ograniczenia
-
-Wspomnij, że oznaczenia nierozliczonych pozycji wymagają uwagi użytkownika.
-
-Autorstwo i kontakt
-
-Dodaj swoje dane kontaktowe lub notkę, np. „Stworzone przez [Twoje Imię]”.
+Ten projekt jest licencjonowany na zasadach licencji MIT. Szczegóły znajdziesz w pliku LICENSE.
