@@ -20,7 +20,7 @@ Pobierz wyciąg z konta bankowego w formacie .xlsx (Excel).
 Upewnij się, że plik zawiera kolumny:
 
 Nadawca / odbiorca
-Kwota zlecenia
+Kwota
 Nazwij plik np. wyciag.xlsx.
 
 Umieść oba pliki (uczestnicy.txt i wyciag.xlsx) w tym samym folderze co program Zaplacone.exe.
@@ -33,15 +33,13 @@ Po zakończeniu działania programu w folderze pojawi się plik raport.txt.
 W pliku raport.txt znajdziesz listę:
 Klientów, którzy nie zapłacili (lub zapłacili za mało)
 Klientów, którzy zapłacili całą wymaganą kwotę
-(opcjonalnie) Wpłat od osób spoza listy uczestników
 Uwagi
 Program rozpoznaje uczestników na podstawie imienia i nazwiska wpisanego w polu "Nadawca / odbiorca" w wyciągu bankowym.
 Jeśli ktoś wpłacił w kilku ratach, kwoty zostaną zsumowane.
-Jeśli pojawi się wpłata od osoby spoza listy uczestników, zostanie ona wyświetlona osobno.
 Najczęstsze problemy
 Brak pliku uczestnicy.txt lub wyciag.xlsx Upewnij się, że oba pliki są w tym samym folderze co program.
-Błąd formatu pliku Sprawdź, czy plik uczestnicy.txt ma poprawny format (każda linia: imię nazwisko, kwota).
-Nieprawidłowy format wyciągu bankowego Program wymaga, by wyciąg miał kolumny "Nadawca / odbiorca" oraz "Kwota zlecenia".
+Błąd formatu pliku Sprawdź, czy plik uczestnicy.txt ma poprawny format (każda linia: imię nazwisko (musi mieć taką samą kolejność jak w przelewie bankowym), kwota).
+Nieprawidłowy format wyciągu bankowego Program wymaga, by wyciąg miał kolumny "Nadawca / odbiorca" oraz "Kwota".
 Kontakt
 W razie problemów lub pytań skontaktuj się z autorem programu - Paweł Wojtyński.
 
