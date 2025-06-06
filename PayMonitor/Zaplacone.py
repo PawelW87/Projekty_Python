@@ -1,7 +1,7 @@
 import pandas as pd
 
-LISTA_PLATNIKOW = 'PayMonitor/lista_test.txt'
-WYCIAG_BANKOWY = 'PayMonitor/wyciag_test.xlsx'
+LISTA_PLATNIKOW = 'PayMonitor/uczestnicy.txt'
+WYCIAG_BANKOWY = 'PayMonitor/wyciag.xlsx'
 RAPORT_PATH = 'PayMonitor/raport.txt'
 
 class Participant:
@@ -98,7 +98,7 @@ def load_payments(xlsx_filename):
     df = pd.read_excel(xlsx_filename)
     for idx, row in df.iterrows():
         payer_name = extract_name_from_payment_field(str(row['Nadawca / odbiorca']))
-        amount = row['Kwota zlecenia']
+        amount = row['Kwota']
         if payer_name and not pd.isnull(amount):
             payments.append(Payment(payer_name, amount))
     return payments
@@ -124,14 +124,19 @@ def print_report(participants):
         participants (list): List of Participant objects.
     """
     with open(RAPORT_PATH, 'w', encoding='utf-8') as f:
+        print("Klienci, którzy nie zapłacili:\n")
         f.write("Klienci, którzy nie zapłacili:\n")
         for p in participants:
             if not p.paid:
-                f.write(f"{p.full_name} - oczekiwano: {p.expected_amount} zł, wpłynęło: {p.amount_paid} zł\n")
+                print(f"{p.full_name} - oczekiwano: {p.expected_amount} zł, wpłynęło: {p.amount_paid} zł")
+                f.write(f"{p.full_name} - oczekiwano: {p.expected_amount} zł,   wpłynęło: {p.amount_paid} zł\n")
+
+        print("\nKlienci, którzy zapłacili:\n")
         f.write("\nKlienci, którzy zapłacili:\n")
         for p in participants:
             if p.paid:
-                f.write(f"{p.full_name} - wpłynęło: {p.amount_paid} zł\n")
+                print(f"{p.full_name} - oczekiwano: {p.expected_amount} zł, wpłynęło: {p.amount_paid} zł")
+                f.write(f"{p.full_name} - oczekiwano: {p.expected_amount} zł,   wpłynęło: {p.amount_paid} zł\n")
     print("Raport został zapisany do pliku raport.txt")
 
 def print_payment_names(payments):
@@ -143,7 +148,7 @@ def print_payment_names(payments):
     """
     print("Lista osób z pliku bankowego:")
     for payment in payments:
-        print(payment.full_name)
+        print(f"{payment.full_name}, {payment.amount}")
 
 def main():
     """
