@@ -43,8 +43,6 @@ Brak pliku uczestnicy.txt lub wyciag.xlsx Upewnij się, że oba pliki są w tym 
 Błąd formatu pliku Sprawdź, czy plik uczestnicy.txt ma poprawny format (każda linia: imię nazwisko, kwota).
 Nieprawidłowy format wyciągu bankowego Program wymaga, by wyciąg miał kolumny "Nadawca / odbiorca" oraz "Kwota zlecenia".
 Kontakt
-W razie problemów lub pytań skontaktuj się z autorem programu.
+W razie problemów lub pytań skontaktuj się z autorem programu - Paweł Wojtyński.
 
-Dziękujemy za korzystanie z Zaplacone!
-
-Jeśli chcesz, dostosuj nazwę pliku, opis lub dane kontaktowe do swoich potrzeb.
+Dziękuję za korzystanie z Zaplacone!
