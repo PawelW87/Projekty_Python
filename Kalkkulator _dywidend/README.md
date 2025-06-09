@@ -70,7 +70,7 @@ project/
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed. See the LICENSE file for details.
 
 
 # Narzędzie do obliczania podatku od dywidend
@@ -145,4 +145,4 @@ projekt/
 
 ## Licencja
 
-Ten projekt jest licencjonowany na zasadach licencji MIT. Szczegóły znajdziesz w pliku LICENSE.
+Ten projekt jest licencjonowany. Szczegóły znajdziesz w pliku LICENSE.

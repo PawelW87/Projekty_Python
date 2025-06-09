@@ -1,6 +1,0 @@
-Klienci, którzy nie zapłacili:
-BOMBA KAPITAN - oczekiwano: 250.0 zł,   wpłynęło: 200.0 zł
-
-Klienci, którzy zapłacili:
-GŁUŚ MARSZAŁEK - oczekiwano: 100.0 zł,   wpłynęło: 100.0 zł
-MICHAŁ PIJOK - oczekiwano: 100.0 zł,   wpłynęło: 100.0 zł

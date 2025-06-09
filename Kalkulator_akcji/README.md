@@ -456,4 +456,4 @@ Stworzone przez Paweł Wojtyński.
 
 ## Licencja
 
-Ten projekt jest licencjonowany na zasadach licencji MIT. Szczegóły znajdziesz w pliku LICENSE.
+Ten projekt jest licencjonowany. Szczegóły znajdziesz w pliku LICENSE.

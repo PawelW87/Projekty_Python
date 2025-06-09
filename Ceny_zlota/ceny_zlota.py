@@ -131,7 +131,7 @@ def gold(ctx):
     """
     DF = ctx.obj['DF']
     if DF is not None:
-        plot_(DF, 'data', 'gold_price_usd', 'Wykres cen złota')
+        plot_(DF, 'data', 'gold_price_usd', 'Wykres cen złota USD/oz')
     else:
         print("Brak danych do wyświetlenia.")
 
@@ -151,4 +151,4 @@ def csv(ctx):
 if __name__ == "__main__":
     cli()
 
-# python D:\IT\folder_do_cwiczen\ceny_zlota.py usd
+# python Ceny_zlota\ceny_zlota.py gold

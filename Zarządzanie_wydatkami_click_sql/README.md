@@ -37,7 +37,7 @@ Tabela `expenses` posiada kolumny:
 
 Przykłady wywołań programu w terminalu:
 
-```bash
+
 # Wyświetlenie raportu wydatków
 python Wydatki_SQL.py report
 
@@ -49,7 +49,7 @@ python Wydatki_SQL.py delete 2
 
 # Import wydatków z pliku CSV
 python Wydatki_SQL.py import-csv
-```
+
 
 Uwagi
 Program oznacza wydatki powyżej 1000 jako duże (oznaczenie (!)).
