@@ -153,7 +153,7 @@ def add_manual_transaction(df):
         
         try:
             symbol_id = input("Enter Symbol ID: ").strip().upper()
-            time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
+            time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").replace(",", "-").strip()
             time = pd.to_datetime(time_str)
             quantity = float(input("Enter Quantity: "))
             pln_values = float(input("Enter PLN Traded Volume: ").replace(",", "."))
