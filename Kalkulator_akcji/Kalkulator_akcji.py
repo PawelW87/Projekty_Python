@@ -156,8 +156,8 @@ def add_manual_transaction(df):
             time_str = input("Enter Time (YYYY-MM-DD HH:MM:SS): ").strip()
             time = pd.to_datetime(time_str)
             quantity = float(input("Enter Quantity: "))
-            pln_values = float(input("Enter PLN Traded Volume: "))
-            commision = float(input("Enter PLN Commission: "))
+            pln_values = float(input("Enter PLN Traded Volume: ").replace(",", "."))
+            commision = float(input("Enter PLN Commission: ").replace(",", "."))
             # Create a new DataFrame for the new transaction with columns required by other functions
             new_transaction = pd.DataFrame({
                 'Symbol ID': [symbol_id],
