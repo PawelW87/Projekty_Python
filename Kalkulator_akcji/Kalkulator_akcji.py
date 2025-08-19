@@ -52,7 +52,8 @@ def get_nbp_exchange_rate(currency, date):
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
-            has_date = True                                  
+            has_date = True   
+            print(f"Pobieram {format_date}")                               
         except:                                
             has_date = False            # back one day before
             print(f"Brak kursu dla {currency.upper()} z dnia {format_date}.\nSzukam w poprzednim dniu")  
@@ -214,8 +215,9 @@ def calculate_profit(df):
     costs = []  # To store the cost for each transaction
     balance = [] # To store the balance for 'Symbol ID' transaction
     warnings = []   # To track missing 'buy' for 'sell' transactions
+    matched_with = [] # To store 'buy' index
 
-    for _, row in df.iterrows():
+    for i, row in df.iterrows():
         symbol = row['Symbol ID']
         transaction_type = row['Side']
         quantity = row['Quantity']
@@ -228,14 +230,17 @@ def calculate_profit(df):
         if transaction_type == 'buy':
             # Add the buy transaction to the FIFO queue for the current Symbol ID
             fifo_queues[symbol].append({
+                'Index': i,
                 'PLN Traded Volume': value,
                 'Quantity': quantity,
                 'PLN Commission': commission,
+                'Original Quantity': quantity,
                 })
             profits.append(np.nan)
             costs.append(np.nan)    # For buys, profit and cost is NaN (null)
             balance.append(sum(transaction['Quantity'] for transaction in fifo_queues[symbol]))  
             warnings.append(None)
+            matched_with.append(None)
             
         elif transaction_type == 'sell':
             total_sell_value = value
@@ -244,13 +249,15 @@ def calculate_profit(df):
             total_cost = 0
             super_total_sell_quantity = quantity
             total_buy_quantity = sum(transaction['Quantity'] for transaction in fifo_queues[symbol])
+            matched_indexes = [] # List of 'buy' index
 
             if not fifo_queues[symbol]:
                 # If no 'buy' transactions are available
                 profits.append(None)
                 costs.append(None)
                 balance.append("Failure")
-                warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")          
+                warnings.append(f"Missing 'buy' for 'sell' transaction of {quantity} units in {symbol}.")      
+                matched_with.append(None)    
                 continue
 
             if total_buy_quantity < quantity:
@@ -258,6 +265,7 @@ def calculate_profit(df):
                 costs.append(None)
                 balance.append("Check")
                 warnings.append(f"Not enough 'buy' for 'sell' transaction of {quantity} units in {symbol} for {total_buy_quantity} buys.")
+                matched_with.append(None)
                 continue
 
             # Process the sell transaction, matching with buys in FIFO order for the current Symbol ID
@@ -266,6 +274,8 @@ def calculate_profit(df):
                 buy_value = buy_transaction['PLN Traded Volume']
                 buy_quantity = buy_transaction['Quantity']
                 buy_commission = buy_transaction['PLN Commission']
+                buy_index = buy_transaction['Index']
+                buy_original_quantity = buy_transaction['Original Quantity']
                                             
                 if buy_quantity <= total_sell_quantity:
                     # If buy quantity is smaller or equal to the quantity sold
@@ -273,6 +283,7 @@ def calculate_profit(df):
                     total_sell_quantity -= buy_quantity
                     summary = sum(transaction['Quantity'] for transaction in fifo_queues[symbol])
                     warn = None
+                    matched_indexes.append((buy_index, f"100.0%"))
                 else:
                     # If buy quantity is larger, adjust the remaining sell quantity
                     total_cost += (total_sell_quantity / buy_quantity) * (buy_value + buy_commission) + (total_sell_quantity / super_total_sell_quantity) * total_sell_commission
@@ -283,6 +294,8 @@ def calculate_profit(df):
                     fifo_queues[symbol].insert(0, buy_transaction)  # Put back the remaining buy portion
                     summary = sum(transaction['Quantity'] for transaction in fifo_queues[symbol])
                     warn = None
+                    percent = round((total_sell_quantity / buy_original_quantity) * 100, 1)
+                    matched_indexes.append((buy_index, f"{percent}%"))
                     break
             
             if summary == 0:
@@ -292,17 +305,22 @@ def calculate_profit(df):
             costs.append(total_cost)
             balance.append(summary)
             warnings.append(warn)
+            matched_with.append(matched_indexes)
 
         else:
             profits.append(np.nan)  # In case there's an invalid 'Side' value
             costs.append(np.nan)
             balance.append(None)
             warnings.append(None)
+            matched_with.append(None)
 
     df['COSTS - KOSZT'] = costs
     df['PROFIT - DOCHÓD'] = profits
     df['BALANCE - SALDO'] = balance
+    df['Matched With'] = matched_with
+    df["INDEX"] = df.index
     df['Warnings'] = warnings
+    
         
     return df
 
@@ -355,6 +373,7 @@ def main():
     calculate_pln_values(df)
     df = add_manual_transaction(df)
     df = df.sort_values(by=['Symbol ID', 'Time'])
+    df = df.reset_index(drop=True)
     df = calculate_profit(df)
     df = map_exchange_to_country(df)
     # print(df.to_string()) ### Present all rows.
