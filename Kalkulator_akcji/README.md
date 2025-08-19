@@ -307,13 +307,17 @@ W przypadku częściowego wykorzystania transakcji "buy", pozostała ilość jes
 
 Dodanie kolumn do DataFrame:
 
-COSTS - KOSZT: Koszty związane z transakcją.
+COSTS - KOSZT: Koszty związane z transakcją "sell".
 
 PROFIT - DOCHÓD: Zysk dla transakcji typu "sell".
 
-STATUS: Status przetwarzania transakcji.
+Warnings: Ostrzeżenia o brakach lub błędach w dopasowaniu.
 
-Warnings: Ostrzeżenia dotyczące braków lub błędów w dopasowaniu.
+BALANCE: saldo instrumentu po każdej transakcji.
+
+Matched With: dopasowanie sprzedaży do wcześniejszych zakupów wedgług kolumny INDEX.
+
+INDEX: numer indeksu oryginalnej transakcji.
 
 Parametry:
 df: DataFrame zawierający kolumny:
@@ -323,7 +327,7 @@ Symbol ID, Side, Quantity, PLN Traded Volume, PLN Commission.
 Zwracane dane:
 DataFrame: Oryginalny DataFrame uzupełniony o kolumny:
 
-COSTS - KOSZT, PROFIT - DOCHÓD, STATUS, Warnings.
+COSTS - KOSZT, PROFIT - DOCHÓD, BALANCE - SALDO, Matched With, INDEX, Warnings.
 
 Uwagi:
 Funkcja zakłada, że dane wejściowe są poprawne, a transakcje "sell" nie przekraczają całkowitej ilości "buy" dla danego Symbol ID.
@@ -331,6 +335,8 @@ Funkcja zakłada, że dane wejściowe są poprawne, a transakcje "sell" nie prze
 Jeśli brakuje transakcji "buy" lub ilość jest niewystarczająca, użytkownik otrzyma ostrzeżenia w kolumnie Warnings.
 
 Rozliczanie prowizji uwzględnia proporcje między transakcjami "buy" i "sell".
+
+Funkcja umożliwia pełną kontrolę nad tym, które transakcje są ze sobą powiązane oraz w jakim zakresie. Ułatwia to weryfikację poprawności rozliczenia podatkowego zgodnie z FIFO.
 
 
 6. Przypisanie do dochodu symbolu kraju giełdy - zgodnie z wymogami dla rozliczeń z Urzędem skarbowym (map_exchange_to_country).
